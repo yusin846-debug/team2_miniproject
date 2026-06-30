@@ -232,18 +232,90 @@ feat(api): POST /api/analyze AI 호출 구현
 chore: .env.local.example 환경변수 템플릿 추가
 ```
 
-### 브랜치 전략
+---
+
+## 협업 규칙
+
+### 1. 브랜치 규칙
 
 ```
-main                        ← 배포 브랜치 (직접 push 금지)
-└── feat/onboarding-login   ← 팀원 A
-└── feat/write-form         ← 팀원 B
-└── feat/result-ai          ← 팀원 C
-└── feat/archive-crud       ← 팀원 D
+main                        ← 배포 브랜치 (직접 push 절대 금지)
+├── feat/onboarding-login   ← 팀원 A
+├── feat/write-form         ← 팀원 B
+├── feat/result-ai          ← 팀원 C
+├── feat/archive-crud       ← 팀원 D
 └── feat/header-nav         ← 팀원 E
 ```
 
-작업 완료 후 `main` 으로 Pull Request → 팀장 확인 후 Merge.
+- 브랜치 이름 형식: `feat/담당화면-기능명`
+- **`main` 직접 push 금지** — GitHub에서 Branch Protection Rule 설정 필요
+  - Settings → Branches → Add rule → `main` → Require pull request before merging ✅
+
+---
+
+### 2. 작업 순서 규칙
+
+매일 작업 시작 전 반드시 아래 순서를 따릅니다.
+
+```bash
+# 1. 최신 main 가져오기
+git checkout main
+git pull origin main
+
+# 2. 내 브랜치로 이동 (없으면 생성)
+git checkout feat/내브랜치이름
+# 처음이라면: git checkout -b feat/내브랜치이름
+
+# 3. main 변경사항을 내 브랜치에 반영
+git merge main
+
+# 4. 작업 후 push
+git add 내가_수정한_파일만
+git commit -m "feat(scope): 설명"
+git push origin feat/내브랜치이름
+```
+
+> `git add .` 대신 **수정한 파일만 add** — 실수로 다른 팀원 파일을 덮어쓰는 상황을 방지합니다.
+
+---
+
+### 3. PR 규칙
+
+- **PR 생성 시점**: 기능 완성 후 (미완성 상태로 PR 금지)
+- **PR 제목**: 커밋 메시지 규칙과 동일 형식 사용
+  ```
+  feat(result): AI 첨삭 결과 5개 카테고리 카드 렌더링
+  ```
+- **Merge 조건**:
+  - 팀장 Approve 1명 이상
+  - 로컬에서 `npm run dev` 실행 후 담당 화면 정상 동작 확인
+- **Merge 방식**: Squash and Merge (커밋 히스토리 깔끔하게 유지)
+
+---
+
+### 4. 충돌 처리 규칙
+
+충돌이 났을 때 **절대 상대방 코드를 마음대로 지우지 않습니다.**
+
+```bash
+# 충돌 발생 시
+git merge main  # 충돌 메시지 확인
+
+# 충돌 파일 열면 아래처럼 표시됨
+<<<<<<< HEAD (내 코드)
+내가 작성한 코드
+=======
+다른 팀원이 작성한 코드
+>>>>>>> main
+```
+
+**처리 방법:**
+1. 충돌 파일 확인 후 해당 팀원에게 먼저 연락
+2. 함께 보면서 어떤 코드를 살릴지 결정
+3. 결정 후 충돌 마커(`<<<<`, `====`, `>>>>`) 제거 후 커밋
+
+**충돌이 가장 잘 나는 파일:** `js/main.js`  
+→ 팀원 E가 중재자 역할. 다른 팀원은 본인 담당 구간만 수정
 
 ---
 
