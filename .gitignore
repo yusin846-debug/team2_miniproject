@@ -1,0 +1,14 @@
+# 환경변수 (API 키 — 절대 커밋하지 않음)
+.env
+.env.local
+.env.*.local
+
+# 의존성
+node_modules/
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db

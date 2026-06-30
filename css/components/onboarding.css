@@ -1,0 +1,26 @@
+/* css/components/onboarding.css — 로그인 + 투어 */
+
+.onboarding {
+  flex: 1; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--navy); padding: 24px;
+}
+.onboarding__card {
+  width: 100%; max-width: 380px; background: #fff;
+  border-radius: 22px; padding: 40px 32px; text-align: center;
+  display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-md);
+}
+.onboarding__logo { width: 64px; height: 64px; object-fit: contain; margin: 0 auto 4px; }
+.onboarding__title { font-size: 24px; font-weight: 800; color: var(--navy); letter-spacing: -.02em; }
+.onboarding__lead { font-size: 14px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+.onboarding__skip { margin-top: 4px; font-size: 13px; color: #9AA0A8; font-weight: 600; }
+.onboarding__skip:hover { color: var(--muted); }
+
+.onboarding__step-ico {
+  width: 48px; height: 48px; margin: 0 auto 6px; border-radius: 50%;
+  background: var(--mint); color: #fff; font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+.onboarding__dots { display: flex; gap: 7px; justify-content: center; margin: 6px 0 14px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #DCE0E8; }
+.dot.is-on { background: var(--blue); width: 20px; border-radius: 4px; }
