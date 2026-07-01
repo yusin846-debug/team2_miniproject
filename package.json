@@ -8,6 +8,15 @@
     "dev:api": "vercel dev",
     "mock": "npx json-server --watch db.json --port 3000"
   },
-  "keywords": ["자소서", "AI", "첨삭", "vanilla-js"],
-  "license": "MIT"
+  "keywords": [
+    "자소서",
+    "AI",
+    "첨삭",
+    "vanilla-js"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "openai": "^6.45.0"
+  }
 }
