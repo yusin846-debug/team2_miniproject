@@ -1,0 +1,93 @@
+/* shared/css/onboarding.css — 로그인 + 기능 투어 */
+
+.onboarding-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(22, 24, 28, .5); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+}
+.onboarding-card {
+  width: 452px; max-width: calc(100vw - 32px);
+  background: #fff; border-radius: 26px; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .32);
+}
+
+/* 로그인 단계 */
+.onboarding-card__hero {
+  padding: 38px 38px 34px; text-align: center;
+  background:
+    radial-gradient(440px 250px at 88% 6%, rgba(37, 99, 255, .20), transparent 62%),
+    radial-gradient(440px 270px at 6% 98%, rgba(34, 199, 167, .22), transparent 64%),
+    linear-gradient(150deg, #EAF1FF 0%, #E9F5F1 100%);
+}
+.onboarding-card__illust { width: 300px; max-width: 86%; height: auto; display: block; margin: 6px auto 2px; }
+.onboarding-card__actions { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
+.kakao-ico {
+  width: 20px; height: 20px; border-radius: 6px; background: #191600; color: #FEE500;
+  font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
+  margin-right: 4px;
+}
+.onboarding-card__skip { background: none; color: #A6ABB2; font-size: 13px; font-weight: 600; margin-top: 18px; }
+.onboarding-card__skip:hover { color: var(--muted); }
+
+/* 투어 단계 */
+.onboarding-card__tour { position: relative; }
+.onboarding-card__close {
+  position: absolute; top: 16px; right: 18px; z-index: 2;
+  background: rgba(255, 255, 255, .82); color: var(--muted);
+  font-size: 12.5px; font-weight: 600; backdrop-filter: blur(4px);
+  padding: 6px 13px; border-radius: 20px; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(20, 22, 28, .08);
+}
+
+.tour-illust {
+  height: 178px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, white), color-mix(in srgb, var(--mint) 11%, white));
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+}
+.tour-illust__img { width: 210px; height: auto; display: block; filter: drop-shadow(0 12px 22px rgba(13, 27, 61, .14)); }
+
+.tour-illust__bars { width: 200px; display: flex; flex-direction: column; gap: 9px; }
+.tour-illust__bars .bar { display: block; height: 9px; border-radius: 5px; background: #E4E6EA; }
+.tour-illust__bars .bar-row { display: flex; gap: 6px; }
+.tour-illust__bars .bar-row .bar { height: 9px; }
+.bar--blue  { background: #2563EB !important; }
+.bar--mint  { background: #0E9F8E !important; }
+.bar--amber { background: #D97706 !important; }
+.bar--pink  { background: #E11D70 !important; }
+
+.tour-illust__cards { position: relative; width: 120px; height: 100px; }
+.tour-illust__card {
+  position: absolute; width: 96px; height: 70px; border-radius: 12px;
+  background: #fff; border: 1px solid var(--line); box-shadow: 0 6px 16px rgba(20, 22, 28, .1);
+}
+.tour-illust__card--back { top: 18px; left: 8px; transform: rotate(-7deg); }
+.tour-illust__card--front {
+  top: 10px; left: 16px; transform: rotate(4deg);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: var(--accent);
+}
+.tour-illust__card--front::before {
+  content: ''; width: 30px; height: 30px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 14%, white);
+}
+
+.onboarding-card__body { padding: 26px 34px 24px; text-align: center; }
+.onboarding-card__title { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.onboarding-card__desc { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.62; }
+
+.tour-dots { display: flex; justify-content: center; gap: 7px; margin-top: 22px; }
+.tour-dot { width: 7px; height: 7px; border-radius: 6px; background: #DCDFE4; transition: all .2s; }
+.tour-dot.is-on { width: 20px; background: var(--accent); }
+
+.onboarding-card__footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-top: 1px solid #F1F2F4;
+}
+.dont-show { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.dont-show__box {
+  width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff; transition: all .15s;
+  border: 1.5px solid #CDD1D6; background: #fff;
+}
+.dont-show__box.is-on { border-color: var(--accent); background: var(--accent); }
+.onboarding-card__nav { display: flex; gap: 8px; }

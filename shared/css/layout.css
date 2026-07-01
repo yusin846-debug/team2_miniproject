@@ -1,0 +1,62 @@
+/* shared/css/layout.css — 앱 셸 / 컨테이너 / 토스트 / 공용 모달 애니메이션 */
+
+#app { min-height: 100%; display: flex; flex-direction: column; }
+
+.app-main { flex: 1; display: flex; flex-direction: column; }
+
+.container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 46px 28px 90px;
+}
+
+/* 토스트 */
+.toast {
+  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--navy); color: #fff;
+  padding: 13px 22px; border-radius: var(--r-pill);
+  font-size: 14px; font-weight: 700; box-shadow: var(--shadow-md);
+  z-index: 80; animation: hs-fade .2s ease;
+}
+.toast__ico {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--mint); color: var(--navy);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
+}
+
+/* 공용 모달/시트 애니메이션 — 온보딩, 저장완료 모달, 보관함 상세 시트, 등록 모달에서 공유 */
+@keyframes hs-fade { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes hs-pop  { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes hs-sheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(22, 24, 28, .45);
+  backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center;
+  z-index: 90; animation: hs-pop .2s ease;
+}
+.modal-card {
+  background: #fff; border-radius: 22px; box-shadow: var(--shadow-lg);
+  max-height: 90vh; overflow: auto;
+}
+
+/* 바텀시트 (보관함 상세보기) */
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(22, 24, 28, .42);
+  backdrop-filter: blur(3px); display: flex; align-items: flex-end; justify-content: center;
+  z-index: 88; animation: hs-fade .2s ease;
+}
+.sheet-card {
+  background: #fff; border-radius: 24px 24px 0 0; width: 100%; max-width: 720px;
+  max-height: 86vh; display: flex; flex-direction: column;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, .22);
+  animation: hs-sheet .34s cubic-bezier(.16, .84, .3, 1);
+}
+.sheet-card__grip { padding: 12px 0 4px; display: flex; justify-content: center; }
+.sheet-card__grip span { width: 44px; height: 5px; border-radius: 5px; background: #E1E3E7; }
+
+/* 반응형 */
+@media (max-width: 860px) {
+  .container { padding: 28px 18px 80px; }
+}

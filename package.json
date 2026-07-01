@@ -1,13 +1,15 @@
 {
-  "name": "jasoseo-transfer",
-  "version": "0.1.0",
-  "description": "자소서 환승 — 한 번 쓴 자소서를 새 회사로 환승시켜주는 AI 첨삭 서비스 (프론트엔드)",
+  "name": "jobdori",
+  "version": "0.2.0",
+  "description": "자소서 환승(잡도리) — 한 번 쓴 자소서를 새 회사로 환승시켜주는 AI 첨삭 서비스",
   "type": "module",
   "scripts": {
     "dev": "npx serve -l 5173 .",
-    "dev:api": "vercel dev",
-    "mock": "npx json-server --watch db.json --port 3000"
+    "dev:api": "node --watch server/index.js"
   },
   "keywords": ["자소서", "AI", "첨삭", "vanilla-js"],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
