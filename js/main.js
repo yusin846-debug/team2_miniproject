@@ -75,6 +75,7 @@ function closeOnboard() {
 /* ---------- 공통(온보딩/내비게이션) 액션 ---------- */
 const sharedActions = {
   // auth:show-form / auth:back / auth:submit 은 onboardingActions 에서 처리
+  'auth:login': () => setState({ onboardingStep: 1 }), // '그냥 둘러볼게요' — 로그인 없이 투어로 진입
   'tour:skip': () => closeOnboard(),
   'tour:open': () => setState({ screen: 'onboarding', onboardingStep: 1 }),
   'tour:next': () => {
