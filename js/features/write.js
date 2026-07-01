@@ -27,10 +27,17 @@ function loadingOverlay(state) {
   <div class="loading-overlay">
     <div class="loading-card">
       <div class="loading-track">
+        <div class="loading-scene">
+          <div class="loading-building loading-building--1"></div>
+          <div class="loading-tree loading-tree--1"></div>
+          <div class="loading-building loading-building--2"></div>
+          <div class="loading-building loading-building--3"></div>
+          <div class="loading-tree loading-tree--2"></div>
+          <div class="loading-building loading-building--4"></div>
+        </div>
+        <div class="loading-road"><div class="loading-road__line"></div></div>
         <div class="loading-runner"><div class="loading-runner__sprite"></div></div>
-        <div class="loading-track__dust"></div>
       </div>
-      <div class="loading-progress"><div class="loading-progress__bar"></div></div>
       <div class="loading-title">잡도리가 자소서를 살펴보고 있어요</div>
       <div class="loading-desc">${escapeHtml(state.customCompany || state.target)} 맞춤으로 열심히 첨삭 중이에요. 잠시만 기다려주세요!</div>
     </div>
