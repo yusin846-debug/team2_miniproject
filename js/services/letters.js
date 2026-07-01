@@ -12,9 +12,15 @@
 // 삭제는 소프트 삭제(휴지통 이동)라, 로컬 폴백도 완전삭제 대신 로컬 휴지통으로 옮긴다.
 
 import { get, post, patch, del } from './http.js';
+import { getStoredUser } from './auth.js';
 import { ARCHIVE_SEED } from '../data/samples.js';
 
-const USE_SERVER = true; // api/letters.js 완성 후 true 로 변경됨
+// TODO 8: api/letters.js 완성 후 true 로 변경됨
+const USE_SERVER = true;
+
+function uid() {
+  return getStoredUser()?.id ?? '';
+}
 
 export const TRASH_RETENTION_DAYS = 30; // 휴지통 보관 기간 — 지나면 자동으로 완전히 삭제
 
@@ -27,6 +33,13 @@ function readLocal(key) {
 }
 function writeLocal(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* 프라이빗 모드 등 접근 불가 시 무시 */ }
+}
+
+// 서버(api/letters.js)의 snippetOf() 와 동일한 방식 — 로컬 폴백 저장 항목도
+// 미리보기 문단이 똑같이 보이도록 클라이언트에서도 같은 요약문을 만들어준다.
+function snippetOf(content = '') {
+  const raw = content.replace(/\n+/g, ' ').trim();
+  return raw.length > 80 ? raw.slice(0, 80) + '…' : raw;
 }
 
 function matchesQuery(a, q) {
@@ -57,10 +70,9 @@ export async function fetchLetters(query = '') {
   let serverLetters = [];
   if (USE_SERVER) {
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ userId: uid() });
       if (query) params.set('q', query);
-      const qs = params.toString();
-      serverLetters = await get(`/api/letters${qs ? `?${qs}` : ''}`);
+      serverLetters = await get(`/api/letters?${params}`);
     } catch {
       serverLetters = []; // 서버 조회 실패 — 로컬 항목만이라도 보여준다
     }
@@ -76,7 +88,10 @@ export async function fetchLetters(query = '') {
     ...localAdded,
     ...serverLetters.filter((a) => !deletedIds.has(a.id) && !localTrashIds.has(a.id)),
   ];
-  merged.sort((a, b) => (a.date < b.date ? 1 : -1));
+  // 날짜가 같으면 0을 반환해야 하는데 예전 코드는 무조건 -1을 반환해서, 날짜가 같은 항목이
+  // 여러 개일 때(하루에 여러 번 저장 등) 정렬 순서가 뒤죽박죽되는 버그가 있었다. 같으면 0을
+  // 반환해 원래 순서(최근 저장한 게 앞에 오도록 이미 구성된 순서)를 그대로 유지하게 고쳤다.
+  merged.sort((a, b) => (a.date === b.date ? 0 : a.date < b.date ? 1 : -1));
   return merged;
 }
 
@@ -106,7 +121,7 @@ export async function fetchLetter(id) {
   if (localMatch) return localMatch;
   if (!USE_SERVER) return ARCHIVE_SEED.find((a) => a.id === id) || null;
   try {
-    return await get(`/api/letters/${id}`);
+    return await get(`/api/letters/${id}?userId=${uid()}`);
   } catch {
     return null;
   }
@@ -126,6 +141,7 @@ export async function saveLetter(payload) {
     question: '',
     count: 0,
     ...payload,
+    snippet: snippetOf(payload.content),
     _local: true,
   };
   const local = readLocal(LOCAL_ADDED_KEY);
@@ -209,7 +225,7 @@ export async function permanentlyDeleteLetter(id) {
   }
 
   try {
-    await del(`/api/letters/${id}?permanent=true`);
+    await del(`/api/letters/${id}?permanent=true&userId=${uid()}`);
     return null;
   } catch {
     // 서버 완전삭제 실패 — 이 기기에서만 숨긴다(서버 목록에는 계속 남아있음).

@@ -3,7 +3,10 @@
 // 온보딩 — 로그인/회원가입 화면 + 기능 투어. 특정 화면 소유가 아닌 공통 셸(최초 진입 시에만 노출).
 
 import { setState } from '../state.js';
-import { login, logout, signup, saveUser } from '../services/auth.js';
+import { login, logout, signup, saveUser, saveLocalUser, findLocalUser } from '../services/auth.js';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(v) { return EMAIL_RE.test(v); }
 
 const TOUR = [
   null, // index 0 = 로그인 단계 (투어 슬라이드 아님)
@@ -40,6 +43,7 @@ export function onboardingView(state) {
             <button class="btn btn--email btn--block" data-action="auth:show-form">이메일로 시작하기</button>
           </div>
           <button class="onboarding-card__skip" data-action="tour:skip">그냥 둘러볼게요</button>
+          <button class="login-refresh-btn" data-action="auth:refresh" title="페이지 새로고침">↻ 새로고침</button>
         </div>
       </div>
     </div>`;
@@ -104,8 +108,8 @@ function renderLoginForm(state) {
           <h2 class="login-form__title">로그인</h2>
           ${state.authError ? `<p class="login-form__error">${state.authError}</p>` : ''}
           <div class="login-form__fields">
-            <input class="login-form__input" type="text" placeholder="아이디"
-              data-action="auth:username" autocomplete="username" />
+            <input class="login-form__input" type="email" placeholder="이메일"
+              data-action="auth:username" autocomplete="email" />
             <input class="login-form__input" type="password" placeholder="비밀번호"
               data-action="auth:password" autocomplete="current-password" />
           </div>
@@ -129,8 +133,8 @@ function renderSignupForm(state) {
           <h2 class="login-form__title">회원가입</h2>
           ${state.authError ? `<p class="login-form__error">${state.authError}</p>` : ''}
           <div class="login-form__fields">
-            <input class="login-form__input" type="text" placeholder="아이디"
-              data-action="auth:signup-username" autocomplete="username" />
+            <input class="login-form__input" type="email" placeholder="이메일"
+              data-action="auth:signup-username" autocomplete="email" />
             <input class="login-form__input" type="password" placeholder="비밀번호"
               data-action="auth:signup-password" autocomplete="new-password" />
             <input class="login-form__input" type="text" placeholder="이름"
@@ -153,13 +157,18 @@ export const onboardingActions = {
   'auth:back':          () => setState({ authMode: 'buttons', authError: '' }),
   'auth:logout':        () => {
     logout();
-    setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '', user: null });
+    setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '', user: null, letters: [] });
   },
+  'auth:refresh':       () => window.location.reload(),
   'auth:submit':        async () => {
     const username = document.querySelector('[data-action="auth:username"]')?.value?.trim() ?? '';
     const password = document.querySelector('[data-action="auth:password"]')?.value ?? '';
     if (!username || !password) {
-      setState({ authError: '아이디와 비밀번호를 입력해주세요' });
+      setState({ authError: '이메일과 비밀번호를 입력해주세요' });
+      return;
+    }
+    if (!isValidEmail(username)) {
+      setState({ authError: '올바른 이메일 형식을 입력해주세요' });
       return;
     }
     try {
@@ -168,6 +177,14 @@ export const onboardingActions = {
       setState({ screen: 'app', user, authError: '' });
     } catch (err) {
       const is401 = err?.message?.includes('401');
+      if (is401) {
+        const localUser = findLocalUser({ username, password });
+        if (localUser) {
+          saveUser(localUser);
+          setState({ screen: 'app', user: localUser, authError: '' });
+          return;
+        }
+      }
       setState({ authError: is401 ? 'ID/비밀번호를 확인해주세요' : '로그인에 실패했어요' });
     }
   },
@@ -176,11 +193,16 @@ export const onboardingActions = {
     const password = document.querySelector('[data-action="auth:signup-password"]')?.value ?? '';
     const name     = document.querySelector('[data-action="auth:signup-name"]')?.value?.trim() ?? '';
     if (!username || !password || !name) {
-      setState({ authError: '아이디, 비밀번호, 이름을 모두 입력해주세요' });
+      setState({ authError: '이메일, 비밀번호, 이름을 모두 입력해주세요' });
+      return;
+    }
+    if (!isValidEmail(username)) {
+      setState({ authError: '올바른 이메일 형식을 입력해주세요' });
       return;
     }
     try {
       const user = await signup({ username, password, name });
+      saveLocalUser({ ...user, username, password });
       saveUser(user);
       setState({ screen: 'app', user, authError: '' });
     } catch (err) {
