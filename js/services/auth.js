@@ -14,6 +14,25 @@ export async function signup({ username, password, name }) {
   return post('/api/auth/signup', { username, password, name });
 }
 
+const LOCAL_USERS_KEY = 'hs_local_users';
+
+export function saveLocalUser({ id, name, username, password }) {
+  try {
+    const users = JSON.parse(localStorage.getItem(LOCAL_USERS_KEY)) || [];
+    if (!users.find((u) => u.username === username)) {
+      users.push({ id, name, username, password });
+      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+    }
+  } catch {}
+}
+
+export function findLocalUser({ username, password }) {
+  try {
+    const users = JSON.parse(localStorage.getItem(LOCAL_USERS_KEY)) || [];
+    return users.find((u) => u.username === username && u.password === password) || null;
+  } catch { return null; }
+}
+
 export function logout() {
   localStorage.removeItem('user');
 }
