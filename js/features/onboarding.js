@@ -5,6 +5,9 @@
 import { setState } from '../state.js';
 import { login, logout, signup, saveUser } from '../services/auth.js';
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(v) { return EMAIL_RE.test(v); }
+
 const TOUR = [
   null, // index 0 = 로그인 단계 (투어 슬라이드 아님)
   { title: '회사만 바꿔서, 자소서 환승', desc: '한 번 잘 쓴 자소서, 새로 지원할 회사에 맞게 단어만 쏙쏙 갈아끼워요.' },
@@ -39,7 +42,7 @@ export function onboardingView(state) {
             </button>
             <button class="btn btn--email btn--block" data-action="auth:show-form">이메일로 시작하기</button>
           </div>
-          <button class="onboarding-card__skip" data-action="auth:login">그냥 둘러볼게요</button>
+          <button class="onboarding-card__skip" data-action="tour:skip">그냥 둘러볼게요</button>
           <button class="login-refresh-btn" data-action="auth:refresh" title="페이지 새로고침">↻ 새로고침</button>
         </div>
       </div>
@@ -105,8 +108,8 @@ function renderLoginForm(state) {
           <h2 class="login-form__title">로그인</h2>
           ${state.authError ? `<p class="login-form__error">${state.authError}</p>` : ''}
           <div class="login-form__fields">
-            <input class="login-form__input" type="text" placeholder="아이디"
-              data-action="auth:username" autocomplete="username" />
+            <input class="login-form__input" type="email" placeholder="이메일"
+              data-action="auth:username" autocomplete="email" />
             <input class="login-form__input" type="password" placeholder="비밀번호"
               data-action="auth:password" autocomplete="current-password" />
           </div>
@@ -130,8 +133,8 @@ function renderSignupForm(state) {
           <h2 class="login-form__title">회원가입</h2>
           ${state.authError ? `<p class="login-form__error">${state.authError}</p>` : ''}
           <div class="login-form__fields">
-            <input class="login-form__input" type="text" placeholder="아이디"
-              data-action="auth:signup-username" autocomplete="username" />
+            <input class="login-form__input" type="email" placeholder="이메일"
+              data-action="auth:signup-username" autocomplete="email" />
             <input class="login-form__input" type="password" placeholder="비밀번호"
               data-action="auth:signup-password" autocomplete="new-password" />
             <input class="login-form__input" type="text" placeholder="이름"
@@ -161,7 +164,11 @@ export const onboardingActions = {
     const username = document.querySelector('[data-action="auth:username"]')?.value?.trim() ?? '';
     const password = document.querySelector('[data-action="auth:password"]')?.value ?? '';
     if (!username || !password) {
-      setState({ authError: '아이디와 비밀번호를 입력해주세요' });
+      setState({ authError: '이메일과 비밀번호를 입력해주세요' });
+      return;
+    }
+    if (!isValidEmail(username)) {
+      setState({ authError: '올바른 이메일 형식을 입력해주세요' });
       return;
     }
     try {
@@ -178,7 +185,11 @@ export const onboardingActions = {
     const password = document.querySelector('[data-action="auth:signup-password"]')?.value ?? '';
     const name     = document.querySelector('[data-action="auth:signup-name"]')?.value?.trim() ?? '';
     if (!username || !password || !name) {
-      setState({ authError: '아이디, 비밀번호, 이름을 모두 입력해주세요' });
+      setState({ authError: '이메일, 비밀번호, 이름을 모두 입력해주세요' });
+      return;
+    }
+    if (!isValidEmail(username)) {
+      setState({ authError: '올바른 이메일 형식을 입력해주세요' });
       return;
     }
     try {

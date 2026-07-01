@@ -70,27 +70,27 @@
   "users": [
     {
       "id": "u1",
-      "username": "admin",
+      "username": "admin@22.com",
       "password": "1234",
       "name": "관리자"
     },
     {
       "id": "u2",
-      "username": "tester",
+      "username": "tester@22.com",
       "password": "1234",
       "name": "테스터"
     },
     {
       "id": "u3",
-      "username": "tester2",
+      "username": "tester2@22.com",
       "password": "1234",
       "name": "테스터2"
     },
     {
-      "id": "u1782903905937",
-      "username": "tester3",
+      "id": "u1782908083504",
+      "username": "user@user.com",
       "password": "1234",
-      "name": "몰래들어온사람"
+      "name": "toy"
     }
   ],
   "letters": [
