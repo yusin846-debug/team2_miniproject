@@ -5,6 +5,25 @@ import { applySuggestions } from '../lib/matcher.js';
 import { badgeStyle } from '../data/companies.js';
 import { escapeHtml } from '../lib/dom.js';
 
+// original/suggestion 두 문장의 공통 앞/뒤 부분을 잘라내고, 실제로 달라진 구간만 반환한다.
+// (카드에 문장 전체를 두 번 보여주는 대신, 바뀐 부분만 보여주기 위함)
+function diffSpan(original, suggestion) {
+  let start = 0;
+  const minLen = Math.min(original.length, suggestion.length);
+  while (start < minLen && original[start] === suggestion[start]) start++;
+
+  let endOrig = original.length;
+  let endSugg = suggestion.length;
+  while (endOrig > start && endSugg > start && original[endOrig - 1] === suggestion[endSugg - 1]) {
+    endOrig--;
+    endSugg--;
+  }
+
+  const from = original.slice(start, endOrig);
+  const to = suggestion.slice(start, endSugg);
+  return from || to ? { from, to } : { from: original, to: suggestion };
+}
+
 export function resultView(state) {
   const company = state.customCompany || state.target;
   const total = state.suggestions.length;
@@ -14,6 +33,7 @@ export function resultView(state) {
 
   const cards = state.suggestions.map((s) => {
     const on = state.appliedIds.includes(s.id);
+    const d = diffSpan(s.original, s.suggestion);
     return `
       <div class="sugg ${on ? 'is-on' : ''}">
         <div class="sugg__head">
@@ -23,9 +43,9 @@ export function resultView(state) {
           </button>
         </div>
         <div class="sugg__diff">
-          <span class="sugg__from">${escapeHtml(s.original)}</span>
+          <span class="sugg__from">${escapeHtml(d.from)}</span>
           <span class="sugg__arrow">→</span>
-          <span class="sugg__to">${escapeHtml(s.suggestion)}</span>
+          <span class="sugg__to">${escapeHtml(d.to)}</span>
         </div>
         <p class="sugg__reason">${escapeHtml(s.reason)}</p>
       </div>`;
