@@ -62,14 +62,13 @@ export function buildSuggestions({ text = '', target = '', role = '' }) {
 }
 
 // 적용된 제안(appliedIds)을 반영한 최종 자소서 본문을 만든다.
-export function applySuggestions(text, suggestions, appliedIds, origin, target) {
+// company 를 포함한 모든 카테고리는 s.original → s.suggestion 로 첫 일치만 치환한다.
+// (본문 전체에서 회사명을 일괄 치환하면 경력 설명 문맥까지 바뀌어버리므로,
+//  회사명도 AI 가 지원동기 문맥으로 판단해 돌려준 문구만 치환 대상으로 삼는다.)
+export function applySuggestions(text, suggestions, appliedIds) {
   let out = text;
-  if (appliedIds.includes('company') && origin && origin !== '—') {
-    out = out.split(origin).join(target); // 회사명은 전체 치환
-  }
   for (const s of suggestions) {
-    if (s.id === 'company') continue;
-    if (appliedIds.includes(s.id)) out = out.replace(s.original, s.suggestion); // 첫 일치만 치환
+    if (appliedIds.includes(s.id)) out = out.replace(s.original, s.suggestion);
   }
   return out;
 }

@@ -9,7 +9,7 @@ export function resultView(state) {
   const company = state.customCompany || state.target;
   const total = state.suggestions.length;
   const applied = state.appliedIds.length;
-  const finalText = applySuggestions(state.text, state.suggestions, state.appliedIds, state.origin, company);
+  const finalText = applySuggestions(state.text, state.suggestions, state.appliedIds);
   const b = badgeStyle(state.target, 28);
 
   const cards = state.suggestions.map((s) => {
