@@ -26,7 +26,11 @@
 .origin b { color: var(--blue); }
 .count { font-size: 12.5px; color: #9AA0A8; }
 
-.editor__question { display: flex; align-items: center; gap: 9px; padding: 14px 20px 0; }
+/* 아이콘(20px 고정박스)과 입력창 텍스트를 같은 기준선에 맞추기 위해, 여백은
+   행(.editor__question) 쪽에 균등하게 주고 입력창 자체엔 세로 패딩을 두지 않는다.
+   (입력창에만 padding-bottom 을 주면 align-items:center 가 박스 전체를 기준으로
+   정렬돼서 텍스트가 아이콘보다 위로 떠 보이는 정렬 어긋남이 생긴다.) */
+.editor__question { display: flex; align-items: center; gap: 9px; padding: 14px 20px; }
 .editor__question-ico {
   width: 20px; height: 20px; border-radius: 6px; flex: none;
   background: color-mix(in srgb, var(--accent) 12%, white); color: var(--accent);
@@ -34,14 +38,32 @@
 }
 .editor__question-input {
   flex: 1; border: none; outline: none; font-size: 16px; font-weight: 700;
-  letter-spacing: -.01em; color: var(--navy); padding: 0 0 14px;
+  letter-spacing: -.01em; color: var(--navy); padding: 0; line-height: 1.3;
 }
 
+/* 브라우저 기본 리사이즈 손잡이(모서리 대각선 아이콘) 대신, 아래 크게/작게 보기
+   토글(.editor__resize-toggle) 로 두 단계 높이를 전환한다 — 자유 드래그보다 예측 가능하고
+   디자인 톤에도 맞다. */
 .editor__area {
-  width: 100%; min-height: 300px; resize: vertical;
+  width: 100%; height: 300px; resize: none;
   border: none; outline: none; padding: 16px 20px 20px;
   font-size: 14.5px; line-height: 1.7; color: var(--text);
+  transition: height .28s cubic-bezier(.4, 0, .2, 1);
 }
+.editor__area.is-expanded { height: 520px; }
+
+.editor__resize-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 10px;
+  background: #FAFBFC; border-top: 1px solid #F1F2F4;
+  font-size: 12px; font-weight: 700; color: #9AA0A8; transition: background .15s, color .15s;
+}
+.editor__resize-toggle:hover { background: #F1F2F4; color: var(--muted); }
+.editor__resize-icon {
+  display: inline-block; font-size: 13px; line-height: 1;
+  transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+}
+.editor__resize-toggle.is-expanded .editor__resize-icon { transform: rotate(180deg); }
 
 /* 패널 */
 .write__panel { flex: 1; display: flex; flex-direction: column; gap: 16px; }
@@ -79,6 +101,119 @@
 }
 .role-chip:hover { border-color: #C9D2E3; }
 .role-chip.is-active { border-color: var(--blue); background: #F5F8FF; color: var(--blue); }
+
+/* 환승 준비하기 응답 대기 오버레이 — 스피너 대신 트랙을 달려가는 러너 + 진행바 */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 95;
+  background: rgba(13, 27, 61, .32);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  display: flex; align-items: center; justify-content: center;
+  animation: hs-overlay-fade .2s ease;
+}
+/* 애플 UI 느낌의 유리(glass) 패널 — 불투명한 흰 배경 대신 반투명 + 블러로,
+   뒤(loading-overlay 가 이미 블러해 둔 화면)가 은은하게 비쳐 보이게 한다. */
+.loading-card {
+  width: 360px; max-width: calc(100vw - 32px);
+  background: rgba(255, 255, 255, .74);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, .5);
+  border-radius: 22px; padding: 28px 30px 28px;
+  text-align: center; box-shadow: var(--shadow-lg);
+  animation: hs-pop .3s ease;
+}
+
+/* 작업 중 상태를 알려주는 작은 소제목 — write__title 위 STEP 배지와 같은 톤 */
+.loading-kicker {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 13px; border-radius: var(--r-pill);
+  background: #E7EEFF; color: var(--blue);
+  font-size: 12px; font-weight: 700; margin-bottom: 14px;
+}
+.loading-kicker i {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--blue);
+  animation: loading-kicker-pulse 1.1s ease-in-out infinite;
+}
+@keyframes loading-kicker-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.7); }
+}
+
+/* 러너(파란 후드) 와 톤을 맞춘 브랜드 블루 하늘 + 회사 건물·가로수 스카이라인 + 도로 */
+.loading-track {
+  position: relative; height: 130px; margin-bottom: 18px;
+  border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--blue) 16%, white) 0%,
+    color-mix(in srgb, var(--blue) 6%, white) 100%);
+  border: 1px solid color-mix(in srgb, var(--blue) 16%, white);
+}
+
+/* 빌딩·가로수 실루엣 — 도로(20px) 바로 위에 걸쳐 세운다 */
+.loading-scene { position: absolute; inset: 0; z-index: 1; }
+.loading-building {
+  position: absolute; bottom: 20px; border-radius: 3px 3px 0 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, .55) 1.4px, transparent 1.4px);
+  background-size: 8px 8px; background-position: 4px 5px;
+}
+.loading-building--1 { left: 4px;   width: 30px; height: 48px; background-color: color-mix(in srgb, var(--navy) 55%, white); }
+.loading-building--2 { left: 92px;  width: 24px; height: 34px; background-color: color-mix(in srgb, var(--blue) 42%, white); }
+.loading-building--3 { left: 176px; width: 34px; height: 58px; background-color: color-mix(in srgb, var(--navy) 62%, white); }
+.loading-building--4 { left: 252px; width: 26px; height: 40px; background-color: color-mix(in srgb, var(--blue) 46%, white); }
+
+.loading-tree { position: absolute; bottom: 20px; width: 16px; height: 30px; }
+.loading-tree::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: color-mix(in srgb, var(--mint) 65%, white);
+}
+.loading-tree::after {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 11px; background: #B08968; border-radius: 1px;
+}
+.loading-tree--1 { left: 54px; }
+.loading-tree--2 { left: 222px; }
+
+/* 도로 — 아스팔트 + 가운데 점선 차선 */
+.loading-road {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 20px; z-index: 2;
+  background: color-mix(in srgb, var(--navy) 80%, white);
+}
+.loading-road__line {
+  position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%);
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .8) 0 10px, transparent 10px 20px);
+}
+
+.loading-runner {
+  position: absolute; bottom: 14px; left: 8px; z-index: 3;
+  animation: runner-dash 1.6s ease-in-out infinite;
+}
+/* "얼렁뚱땅 취준생" 8프레임 러닝 사이클 스프라이트(assets/runner-sprite.png, 프레임당
+   171×220px, 가로 8장 연결본) 를 steps(8) 로 한 프레임씩 넘겨가며 재생한다. */
+.loading-runner__sprite {
+  width: 66px; height: 85px;
+  background-image: url('../../assets/runner-sprite.png');
+  background-repeat: no-repeat;
+  background-size: 528px 85px; /* 프레임 표시폭 66px × 8 */
+  animation: runner-frames .64s steps(8) infinite;
+}
+/* .loading-card 폭이 360px(패딩 제외 내용폭 ~300px)로 고정이라 px 값으로 지정해도 안전하다
+   (translateX(%) 는 트랙이 아니라 러너 자기 자신의 너비 기준이라 % 로는 정확히 맞출 수 없다). */
+@keyframes runner-dash {
+  0%   { transform: translateX(0) scaleX(1); }
+  48%  { transform: translateX(220px) scaleX(1); }
+  50%  { transform: translateX(220px) scaleX(-1); }
+  98%  { transform: translateX(0) scaleX(-1); }
+  100% { transform: translateX(0) scaleX(1); }
+}
+@keyframes runner-frames {
+  from { background-position: 0 0; }
+  to   { background-position: -528px 0; }
+}
+
+.loading-title { font-size: 16px; font-weight: 800; letter-spacing: -.01em; color: var(--navy); }
+.loading-desc { font-size: 12.5px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
 
 @media (max-width: 860px) {
   .write__grid { flex-direction: column; }

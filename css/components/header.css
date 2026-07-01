@@ -40,3 +40,14 @@
   .brand__name { display: none; }
   .user-chip__name { display: none; }
 }
+
+/* 탭이 잡도리·보관함 2개에서 휴지통까지 3개로 늘어나면서, 좁은 화면(iPhone SE 등
+   ~375px)에서 헤더 내용이 뷰포트 폭을 넘겨 오른쪽 요소(물음표 버튼·유저 칩)가
+   잘려 보이던 문제 — 이 구간에서 탭·헤더 여백을 한 단계 더 줄인다. */
+@media (max-width: 480px) {
+  .app-header { padding: 0 10px; gap: 6px; }
+  .tabs { gap: 2px; margin-left: 6px; }
+  .tab { padding: 8px 9px; font-size: 12.5px; }
+  .icon-btn { width: 30px; height: 30px; font-size: 13px; }
+  .user-chip { padding: 4px; }
+}

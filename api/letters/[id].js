@@ -33,11 +33,27 @@ export default async function handler(req, res) {
     return res.status(200).json({ ...item, snippet: snippetOf(item.content) });
   }
 
+  if (req.method === 'PATCH') {
+    // 지금은 "복원"만 지원 (?action=restore) — deletedAt 기록을 지워서 휴지통에서 되돌린다.
+    const db = await readDb();
+    const item = db.letters.find((a) => a.id === id);
+    if (!item) return res.status(404).json({ error: '찾을 수 없어요' });
+    delete item.deletedAt;
+    await writeDb(db);
+    return res.status(200).json({ ...item, snippet: snippetOf(item.content) });
+  }
+
   if (req.method === 'DELETE') {
     const db = await readDb();
-    const before = db.letters.length;
-    db.letters = db.letters.filter((a) => a.id !== id);
-    if (db.letters.length === before) return res.status(404).json({ error: '찾을 수 없어요' });
+    const item = db.letters.find((a) => a.id === id);
+    if (!item) return res.status(404).json({ error: '찾을 수 없어요' });
+
+    const permanent = req.query.permanent === 'true';
+    if (permanent) {
+      db.letters = db.letters.filter((a) => a.id !== id);
+    } else {
+      item.deletedAt = new Date().toISOString(); // 진짜로 지우지 않고 휴지통으로 이동
+    }
     await writeDb(db);
     return res.status(204).end();
   }
