@@ -152,6 +152,7 @@ function renderSignupForm(state) {
 
 /* ---------- 액션 (팀 E가 main.js actions 에 ...onboardingActions 로 spread 해줘야 함) ---------- */
 export const onboardingActions = {
+  'auth:open':          () => setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '' }),
   'auth:show-form':     () => setState({ authMode: 'form', authError: '' }),
   'auth:show-signup':   () => setState({ authMode: 'signup', authError: '' }),
   'auth:back':          () => setState({ authMode: 'buttons', authError: '' }),

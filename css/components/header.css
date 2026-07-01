@@ -51,3 +51,10 @@
   .icon-btn { width: 30px; height: 30px; font-size: 13px; }
   .user-chip { padding: 4px; }
 }
+
+.btn--login-chip {
+  padding: 7px 16px; border-radius: 20px;
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: none; white-space: nowrap;
+}
