@@ -17,7 +17,24 @@ export const writeInitialState = {
   role: '프로덕트 디자이너',
   customCompany: '',
   customRole: '',
+  isAnalyzing: false, // "환승 준비하기" 응답을 기다리는 동안 로딩 오버레이 표시
 };
+
+function loadingOverlay(state) {
+  if (!state.isAnalyzing) return '';
+  return `
+  <div class="loading-overlay">
+    <div class="loading-card">
+      <div class="loading-track">
+        <div class="loading-runner"><span class="loading-runner__emoji">🏃‍♀️</span></div>
+        <div class="loading-track__dust"></div>
+      </div>
+      <div class="loading-progress"><div class="loading-progress__bar"></div></div>
+      <div class="loading-title">잡도리가 자소서를 살펴보고 있어요</div>
+      <div class="loading-desc">${escapeHtml(state.customCompany || state.target)} 맞춤으로 열심히 첨삭 중이에요. 잠시만 기다려주세요!</div>
+    </div>
+  </div>`;
+}
 
 export function writeView(state) {
   const target = state.customCompany || state.target;
@@ -92,17 +109,19 @@ export function writeView(state) {
           <div class="role-chips">${roleChips}</div>
         </div>
 
-        <button class="btn btn--primary btn--block" data-action="write:start" ${canRun ? '' : 'disabled'}>환승 준비하기 →</button>
+        <button class="btn btn--primary btn--block" data-action="write:start" ${canRun && !state.isAnalyzing ? '' : 'disabled'}>환승 준비하기 →</button>
       </aside>
     </div>
-  </section>`;
+  </section>
+  ${loadingOverlay(state)}`;
 }
 
 async function runTransfer() {
   const s = getState();
-  if (!(s.text || '').trim() || !s.target) return; // canRun 아닐 때는 무시
+  if (!(s.text || '').trim() || !s.target || s.isAnalyzing) return; // canRun 아닐 때/중복 클릭은 무시
   const target = s.customCompany || s.target;
   const role = s.customRole || s.role;
+  setState({ isAnalyzing: true });
   let origin, suggestions;
   try {
     ({ origin, suggestions } = await analyze({ text: s.text, target, role }));
@@ -119,6 +138,7 @@ async function runTransfer() {
     appliedIds: [], // 최초엔 미적용 상태로 시작 — 사용자가 하나씩 적용
     activeId: null,
     stage: 'result',
+    isAnalyzing: false,
   });
 }
 

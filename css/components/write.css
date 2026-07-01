@@ -84,6 +84,68 @@
 .role-chip:hover { border-color: #C9D2E3; }
 .role-chip.is-active { border-color: var(--blue); background: #F5F8FF; color: var(--blue); }
 
+/* 환승 준비하기 응답 대기 오버레이 — 스피너 대신 트랙을 달려가는 러너 + 진행바 */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 95;
+  background: rgba(13, 27, 61, .32);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  display: flex; align-items: center; justify-content: center;
+  animation: hs-overlay-fade .2s ease;
+}
+.loading-card {
+  width: 360px; max-width: calc(100vw - 32px);
+  background: #fff; border-radius: 22px; padding: 32px 30px 28px;
+  text-align: center; box-shadow: var(--shadow-lg);
+  animation: hs-pop .3s ease;
+}
+
+.loading-track {
+  position: relative; height: 46px; margin-bottom: 18px;
+  border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg, #F4F7FF 0%, #EEF1F8 100%);
+}
+.loading-track__dust {
+  position: absolute; left: 0; right: 0; bottom: 8px; height: 2px;
+  background: repeating-linear-gradient(90deg, #D6DCEA 0 10px, transparent 10px 20px);
+}
+.loading-runner {
+  position: absolute; bottom: 4px; left: 6px;
+  animation: runner-dash 1.6s ease-in-out infinite;
+}
+.loading-runner__emoji {
+  display: inline-block; font-size: 26px; line-height: 1;
+  animation: runner-bounce .32s ease-in-out infinite;
+}
+/* .loading-card 폭이 360px(패딩 제외 내용폭 ~300px)로 고정이라 px 값으로 지정해도 안전하다
+   (translateX(%) 는 트랙이 아니라 러너 자기 자신의 너비 기준이라 % 로는 정확히 맞출 수 없다). */
+@keyframes runner-dash {
+  0%   { transform: translateX(0) scaleX(1); }
+  48%  { transform: translateX(258px) scaleX(1); }
+  50%  { transform: translateX(258px) scaleX(-1); }
+  98%  { transform: translateX(0) scaleX(-1); }
+  100% { transform: translateX(0) scaleX(1); }
+}
+@keyframes runner-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-5px) rotate(-4deg); }
+}
+
+.loading-progress {
+  height: 7px; border-radius: 999px; background: #EEF1F5; overflow: hidden; margin-bottom: 18px;
+}
+.loading-progress__bar {
+  height: 100%; width: 35%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--mint));
+  animation: progress-indeterminate 1.2s ease-in-out infinite;
+}
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(340%); }
+}
+
+.loading-title { font-size: 16px; font-weight: 800; letter-spacing: -.01em; color: var(--navy); }
+.loading-desc { font-size: 12.5px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
+
 @media (max-width: 860px) {
   .write__grid { flex-direction: column; }
   .write__title { font-size: 25px; }
