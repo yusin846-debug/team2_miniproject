@@ -85,6 +85,12 @@
       "username": "tester2@22.com",
       "password": "1234",
       "name": "테스터2"
+    },
+    {
+      "id": "u1782908083504",
+      "username": "user@user.com",
+      "password": "1234",
+      "name": "toy"
     }
   ],
   "letters": [
