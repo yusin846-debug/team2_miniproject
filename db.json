@@ -67,9 +67,36 @@
       "name": "프론트엔드 개발자"
     }
   ],
+  "users": [
+    {
+      "id": "u1",
+      "username": "admin",
+      "password": "1234",
+      "name": "관리자"
+    },
+    {
+      "id": "u2",
+      "username": "tester",
+      "password": "1234",
+      "name": "테스터"
+    },
+    {
+      "id": "u3",
+      "username": "tester2",
+      "password": "1234",
+      "name": "테스터2"
+    },
+    {
+      "id": "u1782903905937",
+      "username": "tester3",
+      "password": "1234",
+      "name": "몰래들어온사람"
+    }
+  ],
   "letters": [
     {
       "id": "a1782888041861",
+      "userId": "u2",
       "company": "카카오",
       "role": "프로덕트 디자이너",
       "question": "문항 테스트",
@@ -79,6 +106,7 @@
     },
     {
       "id": "a1",
+      "userId": "u2",
       "company": "네이버",
       "role": "프로덕트 디자이너",
       "date": "2026.06.21",
@@ -88,6 +116,7 @@
     },
     {
       "id": "a2",
+      "userId": "u2",
       "company": "배달의민족",
       "role": "브랜드 디자이너",
       "date": "2026.06.14",
@@ -97,6 +126,7 @@
     },
     {
       "id": "a3",
+      "userId": "u2",
       "company": "쿠팡",
       "role": "UX 디자이너",
       "date": "2026.05.30",

@@ -2,12 +2,10 @@
 
 .onboarding-overlay {
   position: fixed; inset: 0; z-index: 70;
-  /* 아이폰 느낌의 유리 블러 — 뒤 화면이 실제로 비쳐 보이도록 tint 는 옅게, blur/saturate 는 강하게 */
-  background: rgba(13, 27, 61, .32);
-  backdrop-filter: blur(26px) saturate(150%);
-  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  background: rgba(13, 27, 61, .48);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
-  animation: hs-overlay-fade .28s ease;
 }
 .onboarding-card {
   width: 452px; max-width: calc(100vw - 32px);
@@ -48,6 +46,40 @@
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* SSO 버튼 공통 */
+.btn--sso {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 14px; font-weight: 600; border-radius: 11px; height: 46px;
+  cursor: not-allowed; opacity: .72;
+}
+.sso-ico {
+  width: 22px; height: 22px; border-radius: 6px;
+  font-size: 12px; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Google */
+.btn--google { background: #fff; border: 1.5px solid #DADCE0; color: #3C4043; }
+.sso-ico--google { background: #fff; color: #4285F4; border: 1.5px solid #DADCE0; font-style: italic; }
+
+/* Kakao */
+.btn--kakao { background: #FEE500; border: none; color: #191600; }
+.sso-ico--kakao { background: #191600; color: #FEE500; }
+
+/* Naver */
+.btn--naver { background: #03C75A; border: none; color: #fff; }
+.sso-ico--naver { background: rgba(255,255,255,.18); color: #fff; }
+
+/* 구분선 */
+.login-divider {
+  display: flex; align-items: center; gap: 10px;
+  color: #C0C4CC; font-size: 12px; margin: 2px 0;
+}
+.login-divider::before,
+.login-divider::after { content: ''; flex: 1; height: 1px; background: #EAECEF; }
+
+/* 기존 kakao-ico (하위 호환) */
 .kakao-ico {
   width: 20px; height: 20px; border-radius: 6px; background: #191600; color: #FEE500;
   font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
@@ -118,3 +150,20 @@
 }
 .dont-show__box.is-on { border-color: var(--accent); background: var(--accent); }
 .onboarding-card__nav { display: flex; gap: 8px; }
+
+/* 로그인 폼 */
+.login-form { width: 100%; display: flex; flex-direction: column; gap: 0; padding: 8px 0 4px; }
+.login-form__title { font-size: 20px; font-weight: 800; color: var(--navy); margin-bottom: 20px; text-align: center; }
+.login-form__error { font-size: 13px; color: #E11D48; background: #FFF1F2; border-radius: 8px; padding: 9px 13px; margin-bottom: 12px; text-align: center; }
+.login-form__fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.login-form__input {
+  width: 100%; padding: 13px 16px; border-radius: 11px;
+  border: 1.5px solid var(--line); font-size: 14px; outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.login-form__input:focus { border-color: var(--accent); }
+.login-form__actions { display: flex; flex-direction: column; gap: 8px; }
+.login-form__switch { font-size: 13px; color: var(--muted); text-align: center; margin-top: 14px; }
+.login-form__switch-btn { color: var(--accent); font-weight: 700; background: none; text-decoration: underline; cursor: pointer; }
+.login-refresh-btn { background: none; color: #B0B8C4; font-size: 12px; font-weight: 500; cursor: pointer; margin-top: 10px; }

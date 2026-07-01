@@ -57,14 +57,63 @@ export function buildSuggestions({ text = '', target = '', role = '' }) {
   return { origin, suggestions: list };
 }
 
-// 적용된 제안(appliedIds)을 반영한 최종 자소서 본문을 만든다.
-// company 를 포함한 모든 카테고리는 s.original → s.suggestion 로 첫 일치만 치환한다.
-// (본문 전체에서 회사명을 일괄 치환하면 경력 설명 문맥까지 바뀌어버리므로,
-//  회사명도 AI 가 지원동기 문맥으로 판단해 돌려준 문구만 치환 대상으로 삼는다.)
-export function applySuggestions(text, suggestions, appliedIds) {
-  let out = text;
+// original/suggestion 두 문장의 공통 앞/뒤 부분을 잘라내고, 실제로 달라진 구간만 반환한다.
+// start 는 original 안에서 그 구간이 시작하는 글자 위치.
+export function diffSpan(original, suggestion) {
+  let start = 0;
+  const minLen = Math.min(original.length, suggestion.length);
+  while (start < minLen && original[start] === suggestion[start]) start++;
+
+  let endOrig = original.length;
+  let endSugg = suggestion.length;
+  while (endOrig > start && endSugg > start && original[endOrig - 1] === suggestion[endSugg - 1]) {
+    endOrig--;
+    endSugg--;
+  }
+
+  const from = original.slice(start, endOrig);
+  const to = suggestion.slice(start, endSugg);
+  return from || to ? { from, to, start } : { from: original, to: suggestion, start: 0 };
+}
+
+// 제안 목록을 "본문 안에서 실제로 바뀌는 글자 구간" 단위로 변환한다.
+// 같은 문장을 통째로 치환하는 대신 diffSpan 으로 좁힌 구간만 쓰기 때문에,
+// 한 문장 안에 서로 다른 카테고리의 수정이 여러 개 있어도(예: 회사명 + 직군) 충돌 없이 함께 반영된다.
+// 구간이 진짜로 겹치는 경우에만 CATEGORY_ORDER 우선순위가 높은 쪽을 남긴다.
+export function computeSuggestionEdits(text, suggestions) {
+  const edits = [];
   for (const s of suggestions) {
-    if (appliedIds.includes(s.id)) out = out.replace(s.original, s.suggestion);
+    const sentenceStart = text.indexOf(s.original);
+    if (sentenceStart === -1) continue;
+    const { from, to, start } = diffSpan(s.original, s.suggestion);
+    edits.push({
+      id: s.id,
+      category: s.category,
+      color: s.color,
+      bg: s.bg,
+      start: sentenceStart + start,
+      end: sentenceStart + start + from.length,
+      from,
+      to,
+    });
+  }
+
+  edits.sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category));
+  const accepted = [];
+  for (const e of edits) {
+    const overlaps = accepted.some((a) => e.start < a.end && a.start < e.end);
+    if (!overlaps) accepted.push(e);
+  }
+  return accepted.sort((a, b) => a.start - b.start);
+}
+
+// 적용된 제안(appliedIds)을 반영한 최종 자소서 본문을 만든다.
+export function applySuggestions(text, suggestions, appliedIds) {
+  const applied = suggestions.filter((s) => appliedIds.includes(s.id));
+  const edits = computeSuggestionEdits(text, applied).sort((a, b) => b.start - a.start); // 뒤에서부터 치환해야 앞쪽 위치가 안 밀림
+  let out = text;
+  for (const e of edits) {
+    out = out.slice(0, e.start) + e.to + out.slice(e.end);
   }
   return out;
 }

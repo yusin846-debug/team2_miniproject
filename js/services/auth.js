@@ -10,6 +10,10 @@ export async function login({ username, password }) {
   return post('/api/auth/login', { username, password });
 }
 
+export async function signup({ username, password, name }) {
+  return post('/api/auth/signup', { username, password, name });
+}
+
 export function logout() {
   localStorage.removeItem('user');
 }
