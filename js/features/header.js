@@ -22,11 +22,13 @@ export function headerView(state) {
       ${tab('trash', '휴지통')}
     </nav>
     <div class="spacer"></div>
+    ${state.user ? `
     <button class="icon-btn" data-action="tour:open" title="둘러보기 다시 보기">?</button>
     <button class="icon-btn" data-action="auth:logout" title="로그아웃">↩</button>
     <div class="user-chip">
-      <span class="user-chip__avatar">${state.user?.name?.[0] ?? '?'}</span>
-      <span class="user-chip__name">${state.user?.name ?? ''}님</span>
-    </div>
+      <span class="user-chip__avatar">${state.user.name[0]}</span>
+      <span class="user-chip__name">${state.user.name}님</span>
+    </div>` : `
+    <button class="btn btn--login-chip" data-action="auth:open">로그인</button>`}
   </header>`;
 }

@@ -11,16 +11,6 @@
   width: 452px; max-width: calc(100vw - 32px);
   background: #fff; border-radius: 26px; overflow: hidden;
   box-shadow: 0 30px 80px rgba(0, 0, 0, .32);
-  animation: onboard-pop .55s cubic-bezier(.34, 1.56, .64, 1);
-}
-
-@keyframes onboard-pop {
-  0%   { opacity: 0; transform: scale(.8) translateY(30px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-@keyframes onboard-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-9px) rotate(-1.5deg); }
 }
 
 /* 로그인 단계 */
@@ -33,19 +23,8 @@
 }
 .onboarding-card__illust {
   width: 300px; max-width: 86%; height: auto; display: block; margin: 6px auto 2px;
-  animation: onboard-float 3.4s ease-in-out .5s infinite;
 }
 .onboarding-card__actions { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
-.onboarding-card__actions .btn {
-  opacity: 0; animation: onboard-rise .4s ease .35s forwards;
-}
-.onboarding-card__actions .btn:last-child { animation-delay: .43s; }
-.onboarding-card__skip { animation: onboard-rise .4s ease .5s both; }
-
-@keyframes onboard-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 /* SSO 버튼 공통 */
 .btn--sso {
   display: flex; align-items: center; justify-content: center; gap: 8px;
