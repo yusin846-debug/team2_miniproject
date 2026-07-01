@@ -51,7 +51,10 @@ export default async function handler(req, res) {
       .filter((a) => !a.deletedAt)
       .filter((a) => isAdmin || a.userId === userId)
       .filter((a) => !q || `${a.company}${a.role}${a.question || ''}${a.content || ''}`.toLowerCase().includes(q))
-      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      // 날짜가 같으면 0을 반환해야 하는데(정렬 규칙), 예전 코드는 무조건 -1을 반환해서
+      // 같은 날짜에 여러 건 저장했을 때 순서가 뒤죽박죽되는 버그가 있었다. 같으면 0을
+      // 반환해 원래 순서(저장 시 배열 맨 앞에 추가된 순서 = 최신순)를 그대로 유지하게 고쳤다.
+      .sort((a, b) => (a.date === b.date ? 0 : a.date < b.date ? 1 : -1))
       .map((a) => ({ ...a, snippet: snippetOf(a.content) }));
     return res.status(200).json(letters);
   }

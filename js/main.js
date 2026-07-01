@@ -35,14 +35,18 @@ function render(state) {
 }
 
 // innerHTML 재렌더는 매번 DOM 노드를 새로 만든다 — 타이핑 중이던 input/textarea 의 포커스가
-// 사라지는 걸 막기 위해, 렌더 직전의 포커스 대상(data-action 기준)과 커서 위치를 기억했다가
-// 재렌더 후 같은 data-action 을 가진 새 엘리먼트에 복원한다.
+// 사라지는 걸 막기 위해, 렌더 직전의 포커스 대상(data-action 기준)·실제 입력값·커서 위치를
+// 기억했다가 재렌더 후 같은 data-action 을 가진 새 엘리먼트에 복원한다.
+// (실제 입력값까지 복원하는 이유: state 값이 비동기 처리 등으로 한 박자 늦게 도착해도,
+//  화면엔 항상 "지금 실제로 친 값"이 우선되게 하기 위함)
 function paint(state) {
   const active = document.activeElement;
+  const isTextField = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
   let focused = null;
-  if (active && root.contains(active) && active.dataset && active.dataset.action) {
+  if (isTextField && root.contains(active) && active.dataset && active.dataset.action) {
     focused = {
       action: active.dataset.action,
+      liveValue: active.value,
       selectionStart: 'selectionStart' in active ? active.selectionStart : null,
       selectionEnd: 'selectionEnd' in active ? active.selectionEnd : null,
     };
@@ -53,11 +57,31 @@ function paint(state) {
   if (focused) {
     const el = root.querySelector(`[data-action="${focused.action}"]`);
     if (el) {
+      if (focused.liveValue != null) el.value = focused.liveValue;
       el.focus();
       if (focused.selectionStart != null && typeof el.setSelectionRange === 'function') {
         try { el.setSelectionRange(focused.selectionStart, focused.selectionEnd); } catch { /* setSelectionRange 미지원 input type(e.g. number) 무시 */ }
       }
     }
+  }
+}
+
+// 한글 IME는 문장 전체가 아니라 "글자(음절) 하나"마다 compositionstart~compositionend가
+// 따로따로 일어난다. compositionend 즉시 paint()(=DOM 재생성)를 하면, 사용자가 바로 이어서
+// 다음 글자를 타이핑하기 시작하는 그 찰나에 재렌더링이 끼어들어 다음 글자의 초성이 씹히거나
+// 깨지는 버그가 생긴다. 그래서 compositionend가 와도 바로 반영하지 않고 아주 잠깐(150ms)
+// 기다렸다가 반영하고, 그 사이 다음 글자의 compositionstart가 또 오면("아직 계속 타이핑
+// 중") 대기를 취소하고 다시 기다린다. 버튼 클릭 등 이 값을 바로 써야 하는 순간에는
+// flushPendingCommit()으로 즉시 반영한다.
+let isComposing = false;
+let commitTimer = null;
+let pendingCommitEl = null;
+
+function flushPendingCommit() {
+  if (commitTimer) {
+    clearTimeout(commitTimer);
+    commitTimer = null;
+    if (pendingCommitEl) { handleAllInputs(pendingCommitEl); pendingCommitEl = null; }
   }
 }
 
@@ -94,27 +118,34 @@ const actions = { ...sharedActions, ...onboardingActions, ...writeActions, ...re
 
 /* ---------- 이벤트 위임 (한 번만 등록) ---------- */
 delegate(root, 'click', '[data-action]', (e, el) => {
+  flushPendingCommit(); // 대기 중인 입력 반영을 먼저 끝내야 방금 친 글자가 안 씹힌다.
   const fn = actions[el.dataset.action];
   if (fn) { e.preventDefault(); fn(e, el); }
 });
-// 한글 입력 시 매 키 입력마다 setState → 전체 innerHTML 재렌더가 일어나면
-// 조합 중이던 DOM 노드가 통째로 교체되어 IME 조합(한글 자모)이 끊기고 글자가 깨진다.
-// compositionstart~compositionend 구간에서는 상태 반영을 건너뛰고, 조합이 끝난 시점에 한 번만 반영한다.
-let isComposing = false;
-delegate(root, 'compositionstart', '[data-action]', () => { isComposing = true; });
+function handleAllInputs(el) {
+  handleOnboardingInput(el.dataset.action, el);
+  handleWriteInput(el.dataset.action, el);
+  handleArchiveInput(el.dataset.action, el);
+  handleTrashInput(el.dataset.action, el);
+}
+
+delegate(root, 'compositionstart', '[data-action]', () => {
+  isComposing = true;
+  clearTimeout(commitTimer);
+  commitTimer = null;
+});
 delegate(root, 'compositionend', '[data-action]', (e, el) => {
   isComposing = false;
-  handleOnboardingInput(el.dataset.action, el);
-  handleWriteInput(el.dataset.action, el);
-  handleArchiveInput(el.dataset.action, el);
-  handleTrashInput(el.dataset.action, el);
+  pendingCommitEl = el;
+  clearTimeout(commitTimer);
+  commitTimer = setTimeout(() => {
+    commitTimer = null;
+    if (!isComposing) { pendingCommitEl = null; handleAllInputs(el); }
+  }, 150);
 });
 delegate(root, 'input', '[data-action]', (e, el) => {
-  if (isComposing) return;
-  handleOnboardingInput(el.dataset.action, el);
-  handleWriteInput(el.dataset.action, el);
-  handleArchiveInput(el.dataset.action, el);
-  handleTrashInput(el.dataset.action, el);
+  if (isComposing || e.isComposing) return;
+  handleAllInputs(el);
 });
 delegate(root, 'change', '[data-action]', (e, el) => {
   if (el.type === 'file') handleArchiveInput(el.dataset.action, el, e);
@@ -122,13 +153,11 @@ delegate(root, 'change', '[data-action]', (e, el) => {
 delegate(root, 'keydown', '[data-action]', (e, el) => {
   handleOnboardingKeydown(e, el.dataset.action);
 });
+// 버튼 클릭 없이 다른 곳을 클릭하거나 탭으로 포커스가 빠져나가는 경우에도, 대기 중이던
+// 입력 반영이 유실되지 않도록 포커스가 빠질 때(focusout) 즉시 반영한다.
+delegate(root, 'focusout', '[data-action]', () => flushPendingCommit());
 
-// setState는 write:text 입력 말고도 토스트 자동 숨김 타이머·보관함 검색 등
-// 곳곳에서 비동기로 호출된다. 그 setState들도 그대로 두면 한글 조합 중에
-// paint()를 강제로 실행시켜 조합 중이던 입력창 DOM을 갈아치워버리므로,
-// 조합 중에는 어떤 setState가 원인이든 paint 자체를 건너뛴다.
-// (state는 정상적으로 갱신되고, 조합이 끝나면 곧바로 setState가 다시 일어나 화면이 따라잡는다.)
-subscribe((s) => { if (!isComposing) paint(s); });
+subscribe(paint);
 
 /* ---------- 시작 ---------- */
 try {

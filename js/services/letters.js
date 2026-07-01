@@ -35,6 +35,13 @@ function writeLocal(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* 프라이빗 모드 등 접근 불가 시 무시 */ }
 }
 
+// 서버(api/letters.js)의 snippetOf() 와 동일한 방식 — 로컬 폴백 저장 항목도
+// 미리보기 문단이 똑같이 보이도록 클라이언트에서도 같은 요약문을 만들어준다.
+function snippetOf(content = '') {
+  const raw = content.replace(/\n+/g, ' ').trim();
+  return raw.length > 80 ? raw.slice(0, 80) + '…' : raw;
+}
+
 function matchesQuery(a, q) {
   if (!q) return true;
   return a.company.includes(q) || a.role.includes(q)
@@ -81,7 +88,10 @@ export async function fetchLetters(query = '') {
     ...localAdded,
     ...serverLetters.filter((a) => !deletedIds.has(a.id) && !localTrashIds.has(a.id)),
   ];
-  merged.sort((a, b) => (a.date < b.date ? 1 : -1));
+  // 날짜가 같으면 0을 반환해야 하는데 예전 코드는 무조건 -1을 반환해서, 날짜가 같은 항목이
+  // 여러 개일 때(하루에 여러 번 저장 등) 정렬 순서가 뒤죽박죽되는 버그가 있었다. 같으면 0을
+  // 반환해 원래 순서(최근 저장한 게 앞에 오도록 이미 구성된 순서)를 그대로 유지하게 고쳤다.
+  merged.sort((a, b) => (a.date === b.date ? 0 : a.date < b.date ? 1 : -1));
   return merged;
 }
 
@@ -131,6 +141,7 @@ export async function saveLetter(payload) {
     question: '',
     count: 0,
     ...payload,
+    snippet: snippetOf(payload.content),
     _local: true,
   };
   const local = readLocal(LOCAL_ADDED_KEY);
