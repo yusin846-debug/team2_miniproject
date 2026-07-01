@@ -8,7 +8,7 @@
 import { post } from './http.js';
 import { buildSuggestions, applySuggestions } from '../lib/matcher.js';
 
-const USE_SERVER = false; // api/analyze.js 완성 후 true 로 변경
+const USE_SERVER = true; // api/analyze.js 완성 후 true 로 변경
 
 export async function analyze({ text, target, role }) {
   if (!USE_SERVER) {
