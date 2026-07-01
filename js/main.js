@@ -4,10 +4,11 @@
 
 import { getState, setState, subscribe } from './state.js';
 import { delegate } from './lib/dom.js';
+import { getStoredUser } from './services/auth.js';
 
 import { headerView } from './features/header.js';
 import { toastView } from './features/toast.js';
-import { onboardingView } from './features/onboarding.js';
+import { onboardingView, onboardingInitialState, onboardingActions, handleOnboardingInput, handleOnboardingKeydown } from './features/onboarding.js';
 import { writeView, writeInitialState, writeActions, handleWriteInput } from './features/write.js';
 import { resultView, resultInitialState, resultActions } from './features/result.js';
 import { archiveView, archiveInitialState, archiveActions, handleArchiveInput, enterArchive } from './features/archive.js';
@@ -16,7 +17,7 @@ import { trashView, trashInitialState, trashActions, handleTrashInput, enterTras
 const root = document.getElementById('app');
 
 // 화면별 상태 슬라이스를 스토어에 합쳐 넣는다 (부팅 시 1회).
-setState({ ...writeInitialState, ...resultInitialState, ...archiveInitialState, ...trashInitialState });
+setState({ ...onboardingInitialState, ...writeInitialState, ...resultInitialState, ...archiveInitialState, ...trashInitialState });
 
 function render(state) {
   const body =
@@ -73,9 +74,9 @@ function closeOnboard() {
 
 /* ---------- 공통(온보딩/내비게이션) 액션 ---------- */
 const sharedActions = {
-  'auth:login': () => setState({ onboardingStep: 1 }), // TODO: 실제 로그인 연동 (팀원 A) — api/auth.js 완성 후 연결
+  // auth:show-form / auth:back / auth:submit 은 onboardingActions 에서 처리
   'tour:skip': () => closeOnboard(),
-  'tour:open': () => setState({ screen: 'onboarding', onboardingStep: 0 }),
+  'tour:open': () => setState({ screen: 'onboarding', onboardingStep: 1 }),
   'tour:next': () => {
     const step = getState().onboardingStep;
     if (step >= 3) closeOnboard();
@@ -88,7 +89,7 @@ const sharedActions = {
   'nav:trash': () => enterTrash(),
 };
 
-const actions = { ...sharedActions, ...writeActions, ...resultActions, ...archiveActions, ...trashActions };
+const actions = { ...sharedActions, ...onboardingActions, ...writeActions, ...resultActions, ...archiveActions, ...trashActions };
 
 /* ---------- 이벤트 위임 (한 번만 등록) ---------- */
 delegate(root, 'click', '[data-action]', (e, el) => {
@@ -102,18 +103,23 @@ let isComposing = false;
 delegate(root, 'compositionstart', '[data-action]', () => { isComposing = true; });
 delegate(root, 'compositionend', '[data-action]', (e, el) => {
   isComposing = false;
+  handleOnboardingInput(el.dataset.action, el);
   handleWriteInput(el.dataset.action, el);
   handleArchiveInput(el.dataset.action, el);
   handleTrashInput(el.dataset.action, el);
 });
 delegate(root, 'input', '[data-action]', (e, el) => {
   if (isComposing) return;
+  handleOnboardingInput(el.dataset.action, el);
   handleWriteInput(el.dataset.action, el);
   handleArchiveInput(el.dataset.action, el);
   handleTrashInput(el.dataset.action, el);
 });
 delegate(root, 'change', '[data-action]', (e, el) => {
   if (el.type === 'file') handleArchiveInput(el.dataset.action, el, e);
+});
+delegate(root, 'keydown', '[data-action]', (e, el) => {
+  handleOnboardingKeydown(e, el.dataset.action);
 });
 
 // setState는 write:text 입력 말고도 토스트 자동 숨김 타이머·보관함 검색 등
@@ -125,7 +131,12 @@ subscribe((s) => { if (!isComposing) paint(s); });
 
 /* ---------- 시작 ---------- */
 try {
-  if (localStorage.getItem('hs_onboard_hide') === '1') setState({ screen: 'app' });
+  const storedUser = getStoredUser();
+  if (storedUser) {
+    setState({ screen: 'app', user: storedUser });
+  } else if (localStorage.getItem('hs_onboard_hide') === '1') {
+    setState({ screen: 'app' });
+  }
 } catch { /* localStorage 접근 불가 환경에서는 매번 온보딩 노출 */ }
 
 paint(getState());

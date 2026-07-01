@@ -40,6 +40,7 @@ export function onboardingView(state) {
             <button class="btn btn--email btn--block" data-action="auth:show-form">이메일로 시작하기</button>
           </div>
           <button class="onboarding-card__skip" data-action="auth:login">그냥 둘러볼게요</button>
+          <button class="login-refresh-btn" data-action="auth:refresh" title="페이지 새로고침">↻ 새로고침</button>
         </div>
       </div>
     </div>`;
@@ -153,8 +154,9 @@ export const onboardingActions = {
   'auth:back':          () => setState({ authMode: 'buttons', authError: '' }),
   'auth:logout':        () => {
     logout();
-    setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '', user: null });
+    setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '', user: null, letters: [] });
   },
+  'auth:refresh':       () => window.location.reload(),
   'auth:submit':        async () => {
     const username = document.querySelector('[data-action="auth:username"]')?.value?.trim() ?? '';
     const password = document.querySelector('[data-action="auth:password"]')?.value ?? '';

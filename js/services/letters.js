@@ -12,9 +12,15 @@
 // 삭제는 소프트 삭제(휴지통 이동)라, 로컬 폴백도 완전삭제 대신 로컬 휴지통으로 옮긴다.
 
 import { get, post, patch, del } from './http.js';
+import { getStoredUser } from './auth.js';
 import { ARCHIVE_SEED } from '../data/samples.js';
 
-const USE_SERVER = true; // api/letters.js 완성 후 true 로 변경됨
+// TODO 8: api/letters.js 완성 후 true 로 변경됨
+const USE_SERVER = true;
+
+function uid() {
+  return getStoredUser()?.id ?? '';
+}
 
 export const TRASH_RETENTION_DAYS = 30; // 휴지통 보관 기간 — 지나면 자동으로 완전히 삭제
 
@@ -57,10 +63,9 @@ export async function fetchLetters(query = '') {
   let serverLetters = [];
   if (USE_SERVER) {
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ userId: uid() });
       if (query) params.set('q', query);
-      const qs = params.toString();
-      serverLetters = await get(`/api/letters${qs ? `?${qs}` : ''}`);
+      serverLetters = await get(`/api/letters?${params}`);
     } catch {
       serverLetters = []; // 서버 조회 실패 — 로컬 항목만이라도 보여준다
     }
@@ -106,7 +111,7 @@ export async function fetchLetter(id) {
   if (localMatch) return localMatch;
   if (!USE_SERVER) return ARCHIVE_SEED.find((a) => a.id === id) || null;
   try {
-    return await get(`/api/letters/${id}`);
+    return await get(`/api/letters/${id}?userId=${uid()}`);
   } catch {
     return null;
   }
@@ -209,7 +214,7 @@ export async function permanentlyDeleteLetter(id) {
   }
 
   try {
-    await del(`/api/letters/${id}?permanent=true`);
+    await del(`/api/letters/${id}?permanent=true&userId=${uid()}`);
     return null;
   } catch {
     // 서버 완전삭제 실패 — 이 기기에서만 숨긴다(서버 목록에는 계속 남아있음).

@@ -12,3 +12,6 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# 개인작업용(공유X)
+SJ.md
