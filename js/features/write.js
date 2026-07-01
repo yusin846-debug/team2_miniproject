@@ -26,6 +26,7 @@ function loadingOverlay(state) {
   return `
   <div class="loading-overlay">
     <div class="loading-card">
+      <span class="loading-kicker"><i></i>잡도리 작업 중</span>
       <div class="loading-track">
         <div class="loading-scene">
           <div class="loading-building loading-building--1"></div>
@@ -39,7 +40,7 @@ function loadingOverlay(state) {
         <div class="loading-runner"><div class="loading-runner__sprite"></div></div>
       </div>
       <div class="loading-title">잡도리가 자소서를 살펴보고 있어요</div>
-      <div class="loading-desc">${escapeHtml(state.customCompany || state.target)} 맞춤으로 열심히 첨삭 중이에요. 잠시만 기다려주세요!</div>
+      <div class="loading-desc">${escapeHtml(state.customCompany || state.target)} 맞춤으로 열심히 첨삭 중이에요.<br>잠시만 기다려주세요!</div>
     </div>
   </div>`;
 }
