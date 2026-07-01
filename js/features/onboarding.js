@@ -39,7 +39,7 @@ export function onboardingView(state) {
             </button>
             <button class="btn btn--email btn--block" data-action="auth:show-form">이메일로 시작하기</button>
           </div>
-          <button class="onboarding-card__skip" data-action="tour:skip">그냥 둘러볼게요</button>
+          <button class="onboarding-card__skip" data-action="auth:login">그냥 둘러볼게요</button>
           <button class="login-refresh-btn" data-action="auth:refresh" title="페이지 새로고침">↻ 새로고침</button>
         </div>
       </div>
