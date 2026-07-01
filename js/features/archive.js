@@ -49,22 +49,29 @@ async function submitAdd() {
     setTimeout(() => setState({ toast: '' }), 2200);
     return;
   }
-  await saveLetter({
+  const saved = await saveLetter({
     company: f.company.trim(),
     role: f.role,
     question: f.question.trim(),
     content: f.content.trim(),
     count: 0,
   });
-  setState({ addModal: false, toast: '보관함에 등록했어요.' });
-  setTimeout(() => setState({ toast: '' }), 2200);
+  setState({
+    addModal: false,
+    toast: saved && saved._local ? '이 기기에만 저장했어요 (서버 연결 실패)' : '보관함에 등록했어요.',
+  });
+  setTimeout(() => setState({ toast: '' }), 2600);
   await refreshLetters();
 }
 
 async function removeLetter(id) {
-  await deleteLetter(id);
-  setState((s) => ({ detailId: s.detailId === id ? null : s.detailId, deleteId: null, toast: '정리했어요.' }));
-  setTimeout(() => setState({ toast: '' }), 2200);
+  const result = await deleteLetter(id);
+  setState((s) => ({
+    detailId: s.detailId === id ? null : s.detailId,
+    deleteId: null,
+    toast: result && result._local ? '이 기기에서만 정리했어요 (서버 연결 실패)' : '정리했어요.',
+  }));
+  setTimeout(() => setState({ toast: '' }), 2600);
   await refreshLetters();
 }
 
@@ -76,7 +83,7 @@ function loadFromDetail() {
     tab: 'write', stage: 'input', detailId: null,
     target: item.company, role: item.role,
     question: item.question || '', text: item.content || item.snippet || '',
-    customCompany: '', appliedIds: [], activeId: null,
+    customCompany: '', customRole: '', appliedIds: [], activeId: null,
     toast: `${item.company} 자소서를 불러왔어요.`,
   });
   setTimeout(() => setState({ toast: '' }), 2200);
