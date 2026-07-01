@@ -11,14 +11,15 @@ import { resultView } from '../../screens/result/result.view.js';
 import { archiveView } from '../../screens/archive/archive.view.js';
 
 export function render(state) {
-  if (state.screen === 'onboarding') {
-    return onboardingView(state) + toastView(state);
-  }
-
   const body =
     state.tab === 'archive' ? archiveView(state)
     : state.stage === 'result' ? resultView(state)
     : writeView(state);
 
-  return headerView(state) + `<main class="app-main">${body}</main>` + toastView(state);
+  // 온보딩(로그인/투어)도 항상 앱 셸 위에 얹어서 그린다 — 뒤에 실제 화면이 있어야
+  // 온보딩 오버레이의 backdrop-filter(블러)가 유리처럼 비쳐 보인다.
+  const shell = headerView(state) + `<main class="app-main">${body}</main>`;
+  const onboarding = state.screen === 'onboarding' ? onboardingView(state) : '';
+
+  return shell + onboarding + toastView(state);
 }
