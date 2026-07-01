@@ -82,12 +82,19 @@ function buildOtherPrompt({ text, target, role }) {
 
 ## keyword — 인재상·가치
 본문에서 (이전에 지원했던 회사의) 인재상/가치/조직문화를 언급한 문장을 찾아라. "${target}"가 실제로 추구할 것으로 알려진 미션·가치에 맞게 그 문장을 다시 쓰도록 제안해라. "${target}"에 대해 확실히 아는 정보가 없다면 사실을 단정하지 말고 일반적인 표현으로 제안하며 confidence 를 "low" 로 설정해라.
+- 화자 자신이 실제로 겪었던 경험(과거 근무·활동 중에 느낀 조직문화 등)을 사실로 서술하는 문장은 절대 건드리지 마라.
+  예: "라인에서 근무하며 수평적인 조직문화를 경험했습니다." → 화자의 실제 경험을 서술한 것이므로 치환 대상 아님
+- 지원동기·포부에서 목표 회사의 가치에 공감을 표현하는 문장만 치환 대상이다.
+  예: "저는 수평적인 조직문화를 지향하는 회사에서 일하고 싶습니다." → 화자의 포부이므로 치환 대상
 
 ## grammar — 문장·맞춤법
-본문에서 어색하거나 맞춤법·문법이 잘못된 문장을 찾아 더 자연스러운 문장으로 고쳐 제안해라. 본문에 없는 새로운 내용을 추가하지 마라.
+본문에서 어색하거나 맞춤법·문법이 잘못된 문장을 찾아 더 자연스러운 문장으로 고쳐 제안해라. 본문에 없는 새로운 내용을 추가하지 마라. 문장이 서술하는 사실(경력, 경험 등) 자체는 절대 바꾸지 말고, 표현만 다듬어라.
 
 ## tone — 지원동기 톤
 본문의 지원동기·자기소개 문장 중 "${target}"의 서비스·브랜드 톤과 어울리지 않는 부분을 찾아, 그 톤에 맞게 다시 쓰도록 제안해라. "${target}"의 톤에 대한 확신이 낮으면 confidence 를 "low" 로 설정해라.
+- 화자 자신의 실제 경험·경력을 사실로 서술하는 문장은 대상에서 제외해라 — 사실 서술을 지원동기 톤으로 바꾸면 없는 포부를 지어내는 것이 된다.
+  예: "라인에서 근무하며 수평적인 조직문화를 경험했습니다." → 사실 서술이므로 톤 변경 대상 아님
+- 지원동기·자기소개·포부를 표현하는 문장만 톤 조정 대상이다.
 
 ## 공통 규칙
 - 카테고리당 최대 1건만 제안해라. 아무것도 발견되지 않은 카테고리는 결과에서 아예 제외해라.
@@ -193,6 +200,12 @@ async function classifyPosition({ text, role }) {
 // 문장 단위로 나눈다 (마침표/느낌표/물음표/줄바꿈 기준). company 치환 대상 문장을 찾는 데만 쓴다.
 function splitSentences(text) {
   return text.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
+}
+
+// fragment 가 속한 "정식 문장"(sentences 중 하나)을 찾는다. 카테고리마다 문장을 인용하는 방식이
+// 조금씩 달라서(코드가 자른 것 vs AI 가 옮겨 적은 것) 단순 문자열 일치 대신 포함 관계로 비교한다.
+function canonicalSentenceOf(sentences, fragment) {
+  return sentences.find((s) => s.includes(fragment) || fragment.includes(s)) ?? fragment;
 }
 
 // AI가 분류한 회사명 중 "target"(치환 대상) 및 "confidence: low"(애매해서 후보로는 남겨야 하는 것)를 골라,
@@ -310,7 +323,20 @@ export default async function handler(req, res) {
       });
     }
 
-    const suggestions = [...companySuggestions, ...positionSuggestions, ...otherSuggestions]
+    // company/position/grammar 가 이미 다루는 문장은 keyword/tone 후보에서 제외한다.
+    // (겹치면 우선순위에 밀려 조용히 무시되는데, 아예 후보에서 빼서 "적용해도 안 바뀌는" 카드 자체가 없게 한다.)
+    const sentences = splitSentences(text);
+    const claimedSentences = new Set([
+      ...companySuggestions.map((s) => canonicalSentenceOf(sentences, s.original)),
+      ...positionSuggestions.map((s) => canonicalSentenceOf(sentences, s.original)),
+      ...otherSuggestions.filter((s) => s.category === 'grammar').map((s) => canonicalSentenceOf(sentences, s.original)),
+    ]);
+    const filteredOtherSuggestions = otherSuggestions.filter((s) => {
+      if (s.category !== 'keyword' && s.category !== 'tone') return true;
+      return !claimedSentences.has(canonicalSentenceOf(sentences, s.original));
+    });
+
+    const suggestions = [...companySuggestions, ...positionSuggestions, ...filteredOtherSuggestions]
       .sort((a, b) => CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)); // 카테고리별로 묶어서 정렬 (Array#sort 는 stable)
 
     res.status(200).json({ origin, suggestions });
