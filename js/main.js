@@ -11,15 +11,17 @@ import { onboardingView } from './features/onboarding.js';
 import { writeView, writeInitialState, writeActions, handleWriteInput } from './features/write.js';
 import { resultView, resultInitialState, resultActions } from './features/result.js';
 import { archiveView, archiveInitialState, archiveActions, handleArchiveInput, enterArchive } from './features/archive.js';
+import { trashView, trashInitialState, trashActions, handleTrashInput, enterTrash } from './features/trash.js';
 
 const root = document.getElementById('app');
 
 // 화면별 상태 슬라이스를 스토어에 합쳐 넣는다 (부팅 시 1회).
-setState({ ...writeInitialState, ...resultInitialState, ...archiveInitialState });
+setState({ ...writeInitialState, ...resultInitialState, ...archiveInitialState, ...trashInitialState });
 
 function render(state) {
   const body =
     state.tab === 'archive' ? archiveView(state)
+    : state.tab === 'trash' ? trashView(state)
     : state.stage === 'result' ? resultView(state)
     : writeView(state);
 
@@ -83,9 +85,10 @@ const sharedActions = {
   'tour:dont-toggle': () => setState((s) => ({ dontShowOnboarding: !s.dontShowOnboarding })),
   'nav:write': () => setState({ tab: 'write' }),
   'nav:archive': () => enterArchive(),
+  'nav:trash': () => enterTrash(),
 };
 
-const actions = { ...sharedActions, ...writeActions, ...resultActions, ...archiveActions };
+const actions = { ...sharedActions, ...writeActions, ...resultActions, ...archiveActions, ...trashActions };
 
 /* ---------- 이벤트 위임 (한 번만 등록) ---------- */
 delegate(root, 'click', '[data-action]', (e, el) => {
@@ -95,6 +98,7 @@ delegate(root, 'click', '[data-action]', (e, el) => {
 delegate(root, 'input', '[data-action]', (e, el) => {
   handleWriteInput(el.dataset.action, el);
   handleArchiveInput(el.dataset.action, el);
+  handleTrashInput(el.dataset.action, el);
 });
 delegate(root, 'change', '[data-action]', (e, el) => {
   if (el.type === 'file') handleArchiveInput(el.dataset.action, el, e);
