@@ -9,5 +9,5 @@ export const CATEGORIES = {
   tone:     { label: '지원동기 톤', color: '#E11D70', bg: '#FCE6F0', reason: '지원동기 톤을 목표 회사의 서비스 톤에 맞춥니다.' },
 };
 
-// 제안 노출/적용 순서
-export const CATEGORY_ORDER = ['company', 'keyword', 'position', 'grammar', 'tone'];
+// 제안 노출/적용 순서 (겹치는 제안이 있을 때 이 순서로 우선순위를 매김 — js/lib/matcher.js 의 computeSuggestionEdits 참고)
+export const CATEGORY_ORDER = ['company', 'position', 'grammar', 'keyword', 'tone'];
