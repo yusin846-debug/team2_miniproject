@@ -6,6 +6,9 @@
 # 의존성
 node_modules/
 
+# Vercel
+.vercel
+
 # OS
 .DS_Store
 Thumbs.db
