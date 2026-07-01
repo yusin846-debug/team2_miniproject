@@ -118,9 +118,25 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, .5);
-  border-radius: 22px; padding: 32px 30px 28px;
+  border-radius: 22px; padding: 28px 30px 28px;
   text-align: center; box-shadow: var(--shadow-lg);
   animation: hs-pop .3s ease;
+}
+
+/* 작업 중 상태를 알려주는 작은 소제목 — write__title 위 STEP 배지와 같은 톤 */
+.loading-kicker {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 13px; border-radius: var(--r-pill);
+  background: #E7EEFF; color: var(--blue);
+  font-size: 12px; font-weight: 700; margin-bottom: 14px;
+}
+.loading-kicker i {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--blue);
+  animation: loading-kicker-pulse 1.1s ease-in-out infinite;
+}
+@keyframes loading-kicker-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.7); }
 }
 
 /* 러너(파란 후드) 와 톤을 맞춘 브랜드 블루 하늘 + 회사 건물·가로수 스카이라인 + 도로 */
