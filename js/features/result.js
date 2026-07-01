@@ -5,7 +5,7 @@
 import { getState, setState } from '../state.js';
 import { badgeStyle } from '../data/companies.js';
 import { escapeHtml } from '../lib/dom.js';
-import { applySuggestions } from '../lib/matcher.js';
+import { applySuggestions, computeSuggestionEdits, diffSpan } from '../lib/matcher.js';
 import { saveLetter } from '../services/letters.js';
 import { CATEGORIES, CATEGORY_ORDER } from '../data/categories.js';
 import { enterArchive } from './archive.js';
@@ -18,62 +18,29 @@ export const resultInitialState = {
   savedModal: false,
 };
 
-// 본문에서 제안 문구가 등장하는 위치를 찾아 겹치지 않게 정렬한다. (미리보기 하이라이트용)
-// api/analyze.js 가 company 카테고리를 문장 단위로 이미 여러 건(company, company-1, …)으로
-// 쪼개서 내려주므로, 여기서는 각 제안을 그 original 문구가 처음 등장하는 위치 1곳에만 매칭하면 된다.
-function findOccurrences(text, suggestions) {
-  const occ = [];
-  suggestions.forEach((s) => {
-    const i = text.indexOf(s.original);
-    if (i !== -1) occ.push({ start: i, end: i + s.original.length, s });
-  });
-  occ.sort((a, b) => a.start - b.start);
-  const out = [];
-  let last = -1;
-  occ.forEach((o) => { if (o.start >= last) { out.push(o); last = o.end; } });
-  return out;
-}
-
 // 미리보기용 세그먼트(일반 텍스트 / 카테고리별 하이라이트) 배열을 만든다.
+// computeSuggestionEdits 가 문장 전체가 아니라 실제로 바뀌는 글자 구간만 돌려주므로,
+// 한 문장에 여러 카테고리(예: 회사명 + 직군)가 걸려도 겹치지 않으면 둘 다 하이라이트된다.
 function buildSegments(text, suggestions, appliedIds, activeId) {
-  const occ = findOccurrences(text, suggestions);
+  const edits = computeSuggestionEdits(text, suggestions);
   const segments = [];
   let cur = 0;
-  occ.forEach((o) => {
-    if (o.start > cur) segments.push({ plain: true, text: text.slice(cur, o.start) });
-    const applied = appliedIds.includes(o.s.id);
+  edits.forEach((e) => {
+    if (e.start > cur) segments.push({ plain: true, text: text.slice(cur, e.start) });
+    const applied = appliedIds.includes(e.id);
     segments.push({
       plain: false,
-      text: applied ? o.s.suggestion : text.slice(o.start, o.end),
-      id: o.s.id,
+      text: applied ? e.to : e.from,
+      id: e.id,
       applied,
-      active: activeId === o.s.id,
-      color: applied ? '#0E8C74' : o.s.color,
-      bg: applied ? '#E2F7F2' : o.s.bg,
+      active: activeId === e.id,
+      color: applied ? '#0E8C74' : e.color,
+      bg: applied ? '#E2F7F2' : e.bg,
     });
-    cur = o.end;
+    cur = e.end;
   });
   if (cur < text.length) segments.push({ plain: true, text: text.slice(cur) });
   return segments;
-}
-
-// original/suggestion 두 문장의 공통 앞/뒤 부분을 잘라내고, 실제로 달라진 구간만 반환한다.
-// (카드에 문장 전체를 두 번 보여주는 대신, 바뀐 부분만 보여주기 위함)
-function diffSpan(original, suggestion) {
-  let start = 0;
-  const minLen = Math.min(original.length, suggestion.length);
-  while (start < minLen && original[start] === suggestion[start]) start++;
-
-  let endOrig = original.length;
-  let endSugg = suggestion.length;
-  while (endOrig > start && endSugg > start && original[endOrig - 1] === suggestion[endSugg - 1]) {
-    endOrig--;
-    endSugg--;
-  }
-
-  const from = original.slice(start, endOrig);
-  const to = suggestion.slice(start, endSugg);
-  return from || to ? { from, to } : { from: original, to: suggestion };
 }
 
 export function resultView(state) {

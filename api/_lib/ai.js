@@ -15,7 +15,6 @@ const REQUEST_TIMEOUT_MS = 30000;
 
 let client;
 function getClient() {
-  console.log('[ai.js] OPENAI_API_KEY present:', Boolean(process.env.OPENAI_API_KEY));
   if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   return client;
 }
@@ -30,6 +29,7 @@ export async function callAI(prompt) {
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' },
+        temperature: 0, // 같은 입력에는 최대한 같은 결과를 내도록 무작위성을 낮춘다
       },
       { signal: controller.signal },
     );
