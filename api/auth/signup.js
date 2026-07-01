@@ -42,8 +42,14 @@ export default async function handler(req, res) {
     name,
   };
 
-  db.users.push(newUser);
-  await writeDb(db);
+  // Vercel 배포 환경은 파일시스템이 읽기 전용이라 writeDb가 실패한다.
+  // 서버 영속 저장은 못 해도 클라이언트(localStorage)에 저장되므로 세션은 유지된다.
+  try {
+    db.users.push(newUser);
+    await writeDb(db);
+  } catch {
+    /* read-only filesystem — 세션 전용 계정으로 진행 */
+  }
 
   return res.status(201).json({ id: newUser.id, name: newUser.name });
 }
