@@ -30,7 +30,7 @@ async function runTransfer() {
   setState({
     origin,
     suggestions,
-    appliedIds: suggestions.map((x) => x.id),
+    appliedIds: [],
     activeId: null,
     stage: 'result',
   });

@@ -15,8 +15,31 @@ const root = document.getElementById('app');
 // 화면별 상태 슬라이스를 스토어에 합쳐 넣는다 (부팅 시 1회).
 setState({ ...writeInitialState, ...resultInitialState, ...archiveInitialState });
 
+// innerHTML 재렌더는 매번 DOM 노드를 새로 만든다 — 타이핑 중이던 input/textarea 의 포커스가
+// 사라지는 걸 막기 위해, 렌더 직전의 포커스 대상(data-action 기준)과 커서 위치를 기억했다가
+// 재렌더 후 같은 data-action 을 가진 새 엘리먼트에 복원한다.
 function paint(state) {
+  const active = document.activeElement;
+  let focused = null;
+  if (active && root.contains(active) && active.dataset && active.dataset.action) {
+    focused = {
+      action: active.dataset.action,
+      selectionStart: 'selectionStart' in active ? active.selectionStart : null,
+      selectionEnd: 'selectionEnd' in active ? active.selectionEnd : null,
+    };
+  }
+
   root.innerHTML = render(state);
+
+  if (focused) {
+    const el = root.querySelector(`[data-action="${focused.action}"]`);
+    if (el) {
+      el.focus();
+      if (focused.selectionStart != null && typeof el.setSelectionRange === 'function') {
+        try { el.setSelectionRange(focused.selectionStart, focused.selectionEnd); } catch { /* setSelectionRange 미지원 input type(e.g. number) 무시 */ }
+      }
+    }
+  }
 }
 
 function enterApp() {
