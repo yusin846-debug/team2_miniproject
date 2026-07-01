@@ -150,6 +150,15 @@ function renderSignupForm(state) {
   </div>`;
 }
 
+function enterAppOrTour(user) {
+  const skipTour = localStorage.getItem('hs_onboard_hide') === '1';
+  if (skipTour) {
+    setState({ screen: 'app', user, authError: '' });
+  } else {
+    setState({ screen: 'onboarding', onboardingStep: 1, user, authError: '' });
+  }
+}
+
 /* ---------- 액션 (팀 E가 main.js actions 에 ...onboardingActions 로 spread 해줘야 함) ---------- */
 export const onboardingActions = {
   'auth:open':          () => setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '' }),
@@ -175,14 +184,14 @@ export const onboardingActions = {
     try {
       const user = await login({ username, password });
       saveUser(user);
-      setState({ screen: 'app', user, authError: '' });
+      enterAppOrTour(user);
     } catch (err) {
       const is401 = err?.message?.includes('401');
       if (is401) {
         const localUser = findLocalUser({ username, password });
         if (localUser) {
           saveUser(localUser);
-          setState({ screen: 'app', user: localUser, authError: '' });
+          enterAppOrTour(localUser);
           return;
         }
       }
@@ -205,7 +214,7 @@ export const onboardingActions = {
       const user = await signup({ username, password, name });
       saveLocalUser({ ...user, username, password });
       saveUser(user);
-      setState({ screen: 'app', user, authError: '' });
+      enterAppOrTour(user);
     } catch (err) {
       const is409 = err?.message?.includes('409');
       setState({ authError: is409 ? '이미 사용 중인 아이디예요' : '가입에 실패했어요' });
