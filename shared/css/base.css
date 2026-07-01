@@ -1,0 +1,54 @@
+/* shared/css/base.css — 리셋 + 공통 요소(버튼/배지/카드) */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--soft);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea { font-family: inherit; }
+b { font-weight: 700; }
+
+/* 카드 */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 배지(회사 마크) */
+.badge { display: inline-flex; align-items: center; justify-content: center; }
+
+/* 버튼 */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 11px 18px; border-radius: 12px;
+  font-size: 14px; font-weight: 700; transition: all .15s ease;
+}
+.btn[disabled] { cursor: default; opacity: .55; }
+.btn--block { width: 100%; }
+.btn--primary { background: var(--blue); color: #fff; }
+.btn--primary:hover { background: #1E40C8; }
+.btn--primary[disabled] { background: #C4C8CE; }
+.btn--primary[disabled]:hover { background: #C4C8CE; }
+.btn--ghost { background: var(--soft); color: var(--navy); }
+.btn--soft { background: var(--cat-company-bg); color: var(--blue); }
+.btn--outline { background: #fff; color: var(--blue); border: 1.5px solid var(--blue); }
+.btn--dark { background: var(--navy); color: #fff; }
+.btn--kakao { background: #FEE500; color: #191600; }
+.btn--email { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+
+/* 작은 둥근 아이콘 버튼 */
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #F1F2F4; color: #6B7178; font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}

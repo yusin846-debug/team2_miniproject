@@ -1,0 +1,44 @@
+/* shared/css/tokens.css
+   브랜드 디자인 토큰 — 브랜드 가이드 기준.
+   색상/타이포/반경/그림자를 변수로 관리해 전 화면에서 재사용한다. */
+
+:root {
+  /* Brand Colors */
+  --navy:   #0D1B3D;   /* Main Navy — 신뢰감·안정감·전문성 */
+  --blue:   #2563FF;   /* Transfer Blue — 변화·방향성 (브랜드 포인트) */
+  --mint:   #22C7A7;   /* Growth Mint — 성장·긍정 */
+  --soft:   #F2F4F7;   /* Soft Gray — 배경 */
+  --accent: var(--blue);
+
+  /* Category Colors */
+  --cat-company-fg:  #2563FF;  --cat-company-bg:  #E7EEFF;
+  --cat-keyword-fg:  #0E9F8E;  --cat-keyword-bg:  #E1F5F2;
+  --cat-position-fg: #7C3AED;  --cat-position-bg: #F1EBFE;
+  --cat-grammar-fg:  #D97706;  --cat-grammar-bg:  #FDF1E1;
+  --cat-tone-fg:     #E11D70;  --cat-tone-bg:     #FCE6F0;
+
+  /* Neutrals */
+  --ink:    #0D1B3D;
+  --text:   #1A2436;
+  --muted:  #6B7178;
+  --line:   #ECEDF0;
+  --white:  #ffffff;
+  --danger: #E5484D;
+  --danger-bg: #FDECEC;
+
+  /* Typography */
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+
+  /* Radius & Shadow */
+  --r-sm: 9px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-pill: 30px;
+  --shadow-sm: 0 1px 3px rgba(20, 22, 28, .05);
+  --shadow-md: 0 6px 20px rgba(20, 22, 28, .08);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, .25);
+
+  /* Layout */
+  --max-w: 1140px;
+  --header-h: 64px;
+}
