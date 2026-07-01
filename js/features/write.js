@@ -26,7 +26,7 @@ function loadingOverlay(state) {
   <div class="loading-overlay">
     <div class="loading-card">
       <div class="loading-track">
-        <div class="loading-runner"><span class="loading-runner__emoji">🏃‍♀️</span></div>
+        <div class="loading-runner"><div class="loading-runner__sprite"></div></div>
         <div class="loading-track__dust"></div>
       </div>
       <div class="loading-progress"><div class="loading-progress__bar"></div></div>
