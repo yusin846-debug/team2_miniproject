@@ -28,11 +28,23 @@ function todayLabel() {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 
+const TRASH_RETENTION_DAYS = 30; // 휴지통 보관 기간 — 지나면 자동으로 완전히 삭제
+
+// 목록을 조회할 때마다 보관 기간이 지난 휴지통 항목을 완전히 지운다 (서버가 따로 배치 작업을 못 돌리므로).
+function purgeExpiredTrash(db) {
+  const cutoff = Date.now() - TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const before = db.letters.length;
+  db.letters = db.letters.filter((a) => !(a.deletedAt && new Date(a.deletedAt).getTime() < cutoff));
+  return db.letters.length !== before;
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const db = await readDb();
+    if (purgeExpiredTrash(db)) await writeDb(db);
     const q = (req.query.q || '').toString().trim().toLowerCase();
     const letters = db.letters
+      .filter((a) => !a.deletedAt)
       .filter((a) => !q || `${a.company}${a.role}${a.question || ''}${a.content || ''}`.toLowerCase().includes(q))
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map((a) => ({ ...a, snippet: snippetOf(a.content) }));

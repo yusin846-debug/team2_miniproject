@@ -15,6 +15,7 @@ export const archiveInitialState = {
   letters: [],               // [{ id, company, role, date, count, question, content, snippet }]
   manageMode: false,
   detailId: null,
+  deleteId: null,
   addModal: false,
   addForm: { company: '', role: ROLES[0], question: '', content: '' },
   uploadName: '',
@@ -62,7 +63,7 @@ async function submitAdd() {
 
 async function removeLetter(id) {
   await deleteLetter(id);
-  setState((s) => ({ detailId: s.detailId === id ? null : s.detailId, toast: '삭제했어요.' }));
+  setState((s) => ({ detailId: s.detailId === id ? null : s.detailId, deleteId: null, toast: '정리했어요.' }));
   setTimeout(() => setState({ toast: '' }), 2200);
   await refreshLetters();
 }
@@ -114,7 +115,9 @@ export const archiveActions = {
   'archive:tag': (_e, el) => search(el.dataset.tag === '전체' ? '' : el.dataset.tag),
   'archive:manage-toggle': () => setState((s) => ({ manageMode: !s.manageMode })),
   'archive:open': (_e, el) => { if (!getState().manageMode) setState({ detailId: el.dataset.id }); },
-  'archive:delete': (e, el) => { e.stopPropagation(); removeLetter(el.dataset.id); },
+  'archive:delete': (e, el) => { e.stopPropagation(); setState({ deleteId: el.dataset.id }); },
+  'archive:delete-cancel': () => setState({ deleteId: null }),
+  'archive:delete-confirm': () => removeLetter(getState().deleteId),
   'archive:detail-close': () => setState({ detailId: null }),
   'archive:detail-copy': () => copyDetail(),
   'archive:detail-load': () => loadFromDetail(),
@@ -238,9 +241,25 @@ function addModal(state) {
   </div>`;
 }
 
+function deleteModal(item) {
+  if (!item) return '';
+  return `
+  <div class="modal-overlay">
+    <div class="modal-card delete-modal">
+      <div class="delete-modal__title">'${escapeHtml(item.company)}' 자소서를 정리할까요?</div>
+      <div class="delete-modal__lead">정리한 자소서는 휴지통으로 이동해요. 30일간 보관되며, 그 안에는 언제든 되돌릴 수 있어요.</div>
+      <div class="delete-modal__actions">
+        <button class="btn btn--ghost" data-action="archive:delete-cancel">취소</button>
+        <button class="btn delete-modal__confirm" data-action="archive:delete-confirm">정리</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 export function archiveView(state) {
   const items = state.letters;
   const detailItem = items.find((a) => a.id === state.detailId) || null;
+  const deleteItem = items.find((a) => a.id === state.deleteId) || null;
 
   const list = items.length
     ? `<div class="archive__grid">${items.map((a) => cardView(a, state.manageMode)).join('')}</div>`
@@ -267,16 +286,17 @@ export function archiveView(state) {
           <input data-action="archive:search" value="${escapeHtml(state.search)}" placeholder="회사·직군·질문 검색" />
         </div>
         <button class="btn btn--primary archive__add-btn" data-action="archive:add-open">＋ 자소서 등록</button>
-        <button class="btn ${state.manageMode ? 'btn--dark' : 'btn--ghost'}" data-action="archive:manage-toggle">${state.manageMode ? '완료' : '정리하기'}</button>
+        <button class="btn btn--dark" data-action="archive:manage-toggle">${state.manageMode ? '완료' : '정리하기'}</button>
       </div>
     </div>
 
     <div class="archive__tags">${tags}</div>
 
-    ${state.manageMode ? `<div class="archive__manage-hint">정리 모드예요 — 카드의 × 버튼을 눌러 자소서를 삭제하세요.</div>` : ''}
+    ${state.manageMode ? `<div class="archive__manage-hint">정리 모드예요 — 카드의 × 버튼을 누르면 휴지통으로 이동해요. 30일 안에는 되돌릴 수 있어요.</div>` : ''}
 
     ${list}
   </section>
   ${detailSheet(detailItem)}
-  ${addModal(state)}`;
+  ${addModal(state)}
+  ${deleteModal(deleteItem)}`;
 }

@@ -1,0 +1,8 @@
+/* css/components/trash.css — 휴지통 (담당: 팀원 D) */
+/* 카드 레이아웃은 보관함(archive.css)의 .archive-card 스타일을 그대로 재사용하고, 여기서는 "삭제됨" 느낌만 살짝 더한다. */
+
+.trash-card { cursor: default; opacity: .78; }
+.trash-card:hover { transform: none; box-shadow: none; border-color: var(--line); }
+.trash-card__restore { width: 100%; }
+.trash-card__ddue { margin-left: auto; font-size: 11px; color: var(--danger); font-weight: 700; white-space: nowrap; }
+.trash-manage-btn { background: var(--danger-bg); color: var(--danger); }

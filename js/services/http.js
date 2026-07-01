@@ -10,6 +10,7 @@ async function request(url, options = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-export const get  = (url)       => request(url);
-export const post = (url, body) => request(url, { method: 'POST',   body: JSON.stringify(body) });
-export const del  = (url)       => request(url, { method: 'DELETE' });
+export const get   = (url)       => request(url);
+export const post  = (url, body) => request(url, { method: 'POST',  body: JSON.stringify(body) });
+export const patch = (url, body) => request(url, { method: 'PATCH', body: JSON.stringify(body || {}) });
+export const del   = (url)       => request(url, { method: 'DELETE' });
