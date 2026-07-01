@@ -104,7 +104,7 @@ export function resultView(state) {
         <div class="sugg__head">
           <span class="sugg__tag" style="background:${s.bg};color:${s.color}">${s.label}</span>
           <button class="sugg__toggle ${on ? 'is-on' : ''}" data-action="result:toggle" data-id="${s.id}">
-            ${on ? '✓ 적용됨' : '적용'}
+            ${on ? '적용됨 ✓' : '적용'}
           </button>
         </div>
         <div class="sugg__diff">
@@ -157,7 +157,7 @@ export function resultView(state) {
       <aside class="suggestions">
         <div class="suggestions__head">
           <h3>잡도리 제안 <b>${total}</b>건</h3>
-          <button class="btn btn--soft" data-action="result:applyAll">${allOn ? '전체 해제' : '전체 적용'}</button>
+          <button class="btn btn--soft" data-action="result:applyAll">${allOn ? '모두 해제' : '모두 적용'}</button>
         </div>
         <div class="suggestions__list">${cards || '<p class="empty">적용할 제안이 없어요.</p>'}</div>
         <div class="result__actions">

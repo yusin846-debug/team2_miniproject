@@ -5,7 +5,7 @@
 import { getState, setState } from '../state.js';
 import { analyze } from '../services/analyze.js';
 import { COMPANY_ORDER, badgeStyle } from '../data/companies.js';
-import { detectOrigin } from '../lib/matcher.js';
+import { detectOrigin, buildSuggestions } from '../lib/matcher.js';
 import { ROLES } from '../data/roles.js';
 import { escapeHtml } from '../lib/dom.js';
 import { SAMPLE_LETTER, SAMPLE_QUESTION } from '../data/samples.js';
@@ -97,7 +97,16 @@ async function runTransfer() {
   const s = getState();
   if (!(s.text || '').trim() || !s.target) return; // canRun 아닐 때는 무시
   const target = s.customCompany || s.target;
-  const { origin, suggestions } = await analyze({ text: s.text, target, role: s.role });
+  let origin, suggestions;
+  try {
+    ({ origin, suggestions } = await analyze({ text: s.text, target, role: s.role }));
+  } catch {
+    // AI 서버(api/analyze.js) 호출 실패 시(키 미설정, 네트워크 오류 등) 화면 전환이
+    // 그대로 멈춰버리지 않도록 로컬 규칙 기반 매칭으로 대체한다.
+    ({ origin, suggestions } = buildSuggestions({ text: s.text, target, role: s.role }));
+    setState({ toast: 'AI 서버 연결에 실패해 로컬 매칭으로 대신 보여드려요.' });
+    setTimeout(() => setState({ toast: '' }), 2600);
+  }
   setState({
     origin,
     suggestions,
