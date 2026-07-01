@@ -3,7 +3,7 @@
 // 온보딩 — 로그인/회원가입 화면 + 기능 투어. 특정 화면 소유가 아닌 공통 셸(최초 진입 시에만 노출).
 
 import { setState } from '../state.js';
-import { login, logout, signup, saveUser } from '../services/auth.js';
+import { login, logout, signup, saveUser, saveLocalUser, findLocalUser } from '../services/auth.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(v) { return EMAIL_RE.test(v); }
@@ -177,6 +177,14 @@ export const onboardingActions = {
       setState({ screen: 'app', user, authError: '' });
     } catch (err) {
       const is401 = err?.message?.includes('401');
+      if (is401) {
+        const localUser = findLocalUser({ username, password });
+        if (localUser) {
+          saveUser(localUser);
+          setState({ screen: 'app', user: localUser, authError: '' });
+          return;
+        }
+      }
       setState({ authError: is401 ? 'ID/비밀번호를 확인해주세요' : '로그인에 실패했어요' });
     }
   },
@@ -194,6 +202,7 @@ export const onboardingActions = {
     }
     try {
       const user = await signup({ username, password, name });
+      saveLocalUser({ ...user, username, password });
       saveUser(user);
       setState({ screen: 'app', user, authError: '' });
     } catch (err) {
