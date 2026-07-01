@@ -6,6 +6,7 @@
 
 import { callAI } from './_lib/ai.js';
 import { CATEGORIES, CATEGORY_ORDER } from '../js/data/categories.js';
+import { replaceWithJosa } from '../js/lib/josa.js';
 
 const REQUIRED_FIELDS = ['id', 'original', 'suggestion', 'reason'];
 const MAX_PER_CATEGORY = 20; // 정상적인 개수 제한이 아니라, AI 오작동(무한 반복 등) 방지용 안전장치
@@ -95,7 +96,7 @@ function buildCompanySuggestions(text, companies, target) {
         color: cat.color,
         bg: cat.bg,
         original: sentence,
-        suggestion: sentence.split(name).join(target),
+        suggestion: replaceWithJosa(sentence, name, target),
         reason: `'${name}'을(를) '${target}'(으)로 치환합니다.`,
         confidence: 'high',
       });
