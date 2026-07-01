@@ -1,46 +1,29 @@
 // js/state.js
-// 아주 작은 중앙 상태 저장소. setState 시 구독자(렌더러)에게 알린다.
+// 중앙 상태 저장소 엔진. 화면(js/features/*)에 대해 아무것도 알지 못하는 leaf 모듈이다.
+// 화면별 상태 슬라이스(write/result/archive)는 js/main.js 가 부팅 시 합쳐 넣는다.
+// (state.js 가 features/* 를 직접 import 하면 features/* → state.js → features/*
+//  순환 참조가 생겨 모듈 평가 순서에 따라 TDZ 에러가 날 수 있어 의도적으로 피한다.)
 
-import { SAMPLE_LETTER } from './data/samples.js';
-
-const initialState = {
-  // ── 공통: 화면 제어 (팀원 E) ──────────────────────────────
+let state = {
+  // ── 공통: 화면 전환 ──────────────────────────────
   screen: 'onboarding',   // 'onboarding' | 'app'
   tab: 'write',           // 'write' | 'archive'
-  stage: 'input',         // 'input' | 'result'
+  stage: 'input',         // 'input' | 'result' (write 탭 내부 단계)
+  onboardingStep: 0,      // 0: 로그인, 1~3: 투어
+  dontShowOnboarding: false,
+  user: null,
 
-  // ── 팀원 A: 로그인·온보딩 ─────────────────────────────────
-  onboardingStep: 0,      // 0: 로그인화면, 1~3: 투어 단계
-  username: '',
-  password: '',
-  user: null,             // { id, name } 로그인 성공 후 저장
-
-  // ── 팀원 B: 자소서 입력 ───────────────────────────────────
-  text: SAMPLE_LETTER,
-  target: '토스',
-  role: '프로덕트 디자이너',
-  customCompany: '',
-
-  // ── 팀원 C: AI 첨삭 결과 ──────────────────────────────────
-  origin: '—',
-  suggestions: [],        // [{ id, category, label, original, suggestion, reason }]
-  appliedIds: [],         // 사용자가 선택한 제안 id 목록
-
-  // ── 팀원 D: 보관함 ────────────────────────────────────────
-  search: '',
-  letters: [],            // [{ id, company, role, date, snippet, content }]
-
-  // ── 공통: 피드백 (팀원 E) ─────────────────────────────────
+  // ── 공통: 피드백 ─────────────────────────────────
   toast: '',
 };
-
-let state = { ...initialState };
 const listeners = new Set();
 
 export const getState = () => state;
 
+// patch 객체 또는 (state) => patch 함수(직전 상태 기반 갱신) 모두 허용한다.
 export function setState(patch) {
-  state = { ...state, ...patch };
+  const next = typeof patch === 'function' ? patch(state) : patch;
+  state = { ...state, ...next };
   listeners.forEach((fn) => fn(state));
 }
 

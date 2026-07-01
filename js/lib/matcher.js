@@ -1,10 +1,6 @@
 // js/lib/matcher.js
-// 자소서 환승 분석 엔진 (MVP, 규칙 기반).
-// ─────────────────────────────────────────────────────────────
-// ⚠️ 추후 계획: 이 모듈의 analyze() 는 그대로 두고, 내부 구현만
-//    Node.js 서버의 POST /transfer (GPT API 첨삭) 호출로 교체한다.
-//    호출부(features/write.js)는 analyze() 시그니처만 의존하므로 영향 없음.
-// ─────────────────────────────────────────────────────────────
+// 자소서 환승 분석 엔진 (MVP, 규칙 기반) — AI 서버(api/analyze.js) 미연동/실패 시 폴백으로 쓰인다.
+// 담당: 팀원 C
 
 import { COMPANIES, COMPANY_ORDER } from '../data/companies.js';
 import { CATEGORIES, CATEGORY_ORDER } from '../data/categories.js';

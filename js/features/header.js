@@ -1,5 +1,5 @@
 // js/features/header.js
-// 상단 헤더: 로고 / 탭(잡도리·보관함) / 사용자 칩
+// 상단 헤더: 로고 / 탭(잡도리·보관함) / 사용자 칩 — 특정 화면 소유가 아닌 공통 셸.
 
 export function headerView(state) {
   const tab = (id, label) => {

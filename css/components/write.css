@@ -1,4 +1,4 @@
-/* css/components/write.css — 입력 단계 */
+/* css/components/write.css — 입력 단계 (담당: 팀원 B) */
 
 .step-badge {
   display: inline-flex; align-items: center; gap: 7px;
@@ -25,9 +25,21 @@
 .origin { font-size: 12.5px; color: var(--muted); }
 .origin b { color: var(--blue); }
 .count { font-size: 12.5px; color: #9AA0A8; }
+
+.editor__question { display: flex; align-items: center; gap: 9px; padding: 14px 20px 0; }
+.editor__question-ico {
+  width: 20px; height: 20px; border-radius: 6px; flex: none;
+  background: color-mix(in srgb, var(--accent) 12%, white); color: var(--accent);
+  font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.editor__question-input {
+  flex: 1; border: none; outline: none; font-size: 16px; font-weight: 700;
+  letter-spacing: -.01em; color: var(--navy); padding: 0 0 14px;
+}
+
 .editor__area {
-  width: 100%; min-height: 320px; resize: vertical;
-  border: none; outline: none; padding: 20px;
+  width: 100%; min-height: 300px; resize: vertical;
+  border: none; outline: none; padding: 16px 20px 20px;
   font-size: 14.5px; line-height: 1.7; color: var(--text);
 }
 
@@ -50,6 +62,15 @@
 }
 .company-chip:hover { border-color: #C9D2E3; }
 .company-chip.is-active { border-color: var(--blue); background: #F5F8FF; color: var(--blue); }
+
+.target-card {
+  display: flex; align-items: center; gap: 11px; margin-top: 14px; padding: 12px;
+  border-radius: 13px; background: color-mix(in srgb, var(--accent) 7%, white);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, white);
+}
+.target-card__text { display: flex; flex-direction: column; line-height: 1.2; }
+.target-card__text strong { font-size: 13.5px; color: var(--text); }
+.target-card__text span { font-size: 11px; color: var(--accent); font-weight: 700; }
 
 .role-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .role-chip {

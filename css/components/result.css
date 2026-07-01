@@ -1,55 +1,98 @@
-/* css/components/result.css — 결과 단계 (미리보기 + 제안) */
+/* css/components/result.css — 결과 단계 (담당: 팀원 B/C, AI 첨삭 핵심) */
 
-.link-back { font-size: 13.5px; font-weight: 700; color: var(--muted); margin-bottom: 18px; }
+.result { max-width: 1260px; }
+
+.result__top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.link-back {
+  display: flex; align-items: center; gap: 6px; background: #fff;
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 13px;
+  font-size: 13px; font-weight: 600; color: #4A4F56;
+}
 .link-back:hover { color: var(--navy); }
+.result__meta { display: flex; align-items: center; gap: 10px; }
+.result__meta strong { font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+.result__dot { font-size: 13px; color: #C2C6CC; }
+.result__role { font-size: 14px; font-weight: 600; color: var(--muted); }
+.result__count {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 600; color: var(--muted);
+  background: #fff; border: 1px solid var(--line); padding: 7px 13px; border-radius: var(--r-pill);
+}
+.result__count b { color: #23262C; }
+.result__count b.is-accent { color: var(--blue); }
 
-.result__grid { display: flex; gap: 24px; align-items: flex-start; }
+.result__grid { display: flex; gap: 22px; align-items: flex-start; }
 
 /* 미리보기 */
 .preview { flex: 1.6; overflow: hidden; }
 .preview__head {
-  display: flex; align-items: center; gap: 11px;
-  padding: 16px 20px; border-bottom: 1px solid #F1F2F4;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 24px; border-bottom: 1px solid #F1F2F4;
 }
-.preview__head strong { font-size: 15px; color: var(--navy); }
-.preview__role { font-size: 13px; color: var(--muted); margin-left: 4px; }
-.preview__count { margin-left: auto; font-size: 12.5px; color: var(--blue); font-weight: 700; }
+.preview__label { font-size: 13.5px; font-weight: 700; }
+.legend { display: flex; gap: 13px; flex-wrap: wrap; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #8B9098; }
+.legend-item__dot { width: 9px; height: 9px; border-radius: 3px; }
+
+.preview__question {
+  display: flex; gap: 9px; align-items: flex-start; padding: 22px 28px 0;
+  font-size: 15px; font-weight: 700; line-height: 1.5; letter-spacing: -.01em; color: #16181D;
+}
+.preview__question span { flex: none; font-weight: 800; color: var(--accent); }
+
 .preview__body {
-  padding: 22px 24px; font-size: 14.5px; line-height: 1.8; color: var(--text);
-  min-height: 280px; white-space: normal;
+  padding: 22px 28px 28px; font-size: 15.5px; line-height: 1.95; color: var(--text);
+  white-space: pre-wrap; min-height: 280px;
 }
-.preview__actions {
-  display: flex; gap: 10px; padding: 16px 20px; border-top: 1px solid #F1F2F4;
-}
-.preview__actions .btn { flex: 1; }
 
 /* 제안 리스트 */
-.suggestions { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.suggestions { flex: 1; max-width: 402px; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 84px; }
 .suggestions__head { display: flex; align-items: center; justify-content: space-between; }
-.suggestions__head h3 { font-size: 15px; font-weight: 700; color: var(--navy); }
+.suggestions__head h3 { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
 .suggestions__head h3 b { color: var(--blue); }
-.suggestions__list { display: flex; flex-direction: column; gap: 12px; }
+.suggestions__list { display: flex; flex-direction: column; gap: 11px; max-height: 480px; overflow: auto; padding: 2px; }
 
 .sugg {
-  background: #fff; border: 1px solid var(--line);
-  border-radius: var(--r-md); padding: 14px 16px; transition: all .15s;
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: var(--r-md); padding: 15px; cursor: pointer; transition: all .15s;
+  box-shadow: 0 1px 2px rgba(20, 22, 28, .03);
 }
-.sugg.is-on { background: #FAFCFF; border-color: #CBDAFF; }
+.sugg.is-active { box-shadow: 0 4px 16px rgba(20, 22, 28, .08); }
+.sugg.is-on { background: #FAFCFF; }
 .sugg__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.sugg__tag { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+.sugg__tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
 .sugg__toggle {
-  padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
-  background: var(--soft); color: var(--muted);
+  padding: 6px 13px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  background: var(--accent); color: #fff;
 }
-.sugg__toggle.is-on { background: var(--mint); color: #05332C; }
-.sugg__diff { font-size: 13px; line-height: 1.5; }
-.sugg__from { color: #9AA0A8; text-decoration: line-through; }
-.sugg__arrow { color: #C2CCE0; margin: 0 6px; }
-.sugg__to { color: var(--navy); font-weight: 700; }
-.sugg__reason { margin-top: 8px; font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+.sugg__toggle.is-on { background: #E2F7F2; color: #0E8C74; }
+.sugg__diff { font-size: 13.5px; line-height: 1.55; margin-bottom: 9px; }
+.sugg__from { display: block; color: #9AA0A8; text-decoration: line-through; margin-bottom: 5px; }
+.sugg__arrow { color: var(--muted); margin-right: 7px; font-weight: 800; }
+.sugg__to { color: #23262C; font-weight: 600; }
+.sugg__reason {
+  font-size: 11.5px; line-height: 1.5; color: #A6ABB2;
+  background: #FAFBFC; border-radius: 8px; padding: 8px 10px;
+}
 
 .empty { font-size: 13px; color: var(--muted); padding: 12px; }
 
+.result__actions { display: flex; gap: 9px; padding-top: 2px; }
+.result__actions .btn { flex: 1; }
+
+/* 저장 완료 모달 */
+.saved-modal { width: 380px; max-width: calc(100vw - 32px); padding: 34px; text-align: center; }
+.saved-modal__ico {
+  width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 16px;
+  background: #E2F7F2; color: #0E8C74; font-size: 28px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.saved-modal__title { font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.saved-modal__desc { font-size: 13.5px; color: #8B9098; margin-top: 8px; line-height: 1.5; }
+.saved-modal__actions { display: flex; gap: 9px; margin-top: 24px; }
+.saved-modal__actions .btn { flex: 1; }
+
 @media (max-width: 860px) {
   .result__grid { flex-direction: column; }
+  .suggestions { max-width: none; position: static; }
 }

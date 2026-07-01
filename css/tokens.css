@@ -23,6 +23,8 @@
   --muted:  #6B7178;
   --line:   #ECEDF0;
   --white:  #ffffff;
+  --danger: #E5484D;
+  --danger-bg: #FDECEC;
 
   /* Typography */
   --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -34,6 +36,7 @@
   --r-pill: 30px;
   --shadow-sm: 0 1px 3px rgba(20, 22, 28, .05);
   --shadow-md: 0 6px 20px rgba(20, 22, 28, .08);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, .25);
 
   /* Layout */
   --max-w: 1140px;

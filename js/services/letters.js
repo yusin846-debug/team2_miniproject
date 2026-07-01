@@ -2,24 +2,26 @@
 // 보관함 CRUD 서비스.
 // 담당: 팀원 D
 //
-// [현재] /api/letters 가 없으면 로컬 시드 데이터로 폴백
-// [추후] api/letters.js 서버리스 함수 완성 후 폴백 코드 제거
+// [현재] api/letters.js · api/letters/[id].js 완성됨 — 서버로 요청
+// [폴백] 서버 실패 시 로컬 시드 데이터(ARCHIVE_SEED)로 대체할 수 있음 — USE_SERVER=false 로 전환
 
 import { get, post, del } from './http.js';
 import { ARCHIVE_SEED } from '../data/samples.js';
 
-const USE_SERVER = false; // api/letters.js 완성 후 true 로 변경
+const USE_SERVER = true; // api/letters.js 완성 후 true 로 변경됨
 
 export async function fetchLetters(query = '') {
   if (!USE_SERVER) {
     const q = query.trim();
     return ARCHIVE_SEED.filter(
-      (a) => !q || a.company.includes(q) || a.snippet.includes(q) || a.role.includes(q),
+      (a) => !q || a.company.includes(q) || a.role.includes(q)
+        || (a.question || '').includes(q) || (a.content || '').includes(q),
     );
   }
-  const params = new URLSearchParams({ _sort: 'date', _order: 'desc' });
+  const params = new URLSearchParams();
   if (query) params.set('q', query);
-  return get(`/api/letters?${params}`);
+  const qs = params.toString();
+  return get(`/api/letters${qs ? `?${qs}` : ''}`);
 }
 
 export async function fetchLetter(id) {
@@ -32,7 +34,7 @@ export async function saveLetter(payload) {
     const item = {
       id: 'a' + Date.now(),
       date: new Date().toISOString().slice(0, 10).replace(/-/g, '.'),
-      snippet: (payload.content || '').slice(0, 60) + '…',
+      question: '',
       ...payload,
     };
     ARCHIVE_SEED.unshift(item);
