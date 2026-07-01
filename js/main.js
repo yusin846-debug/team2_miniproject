@@ -95,7 +95,19 @@ delegate(root, 'click', '[data-action]', (e, el) => {
   const fn = actions[el.dataset.action];
   if (fn) { e.preventDefault(); fn(e, el); }
 });
+// 한글 입력 시 매 키 입력마다 setState → 전체 innerHTML 재렌더가 일어나면
+// 조합 중이던 DOM 노드가 통째로 교체되어 IME 조합(한글 자모)이 끊기고 글자가 깨진다.
+// compositionstart~compositionend 구간에서는 상태 반영을 건너뛰고, 조합이 끝난 시점에 한 번만 반영한다.
+let isComposing = false;
+delegate(root, 'compositionstart', '[data-action]', () => { isComposing = true; });
+delegate(root, 'compositionend', '[data-action]', (e, el) => {
+  isComposing = false;
+  handleWriteInput(el.dataset.action, el);
+  handleArchiveInput(el.dataset.action, el);
+  handleTrashInput(el.dataset.action, el);
+});
 delegate(root, 'input', '[data-action]', (e, el) => {
+  if (isComposing) return;
   handleWriteInput(el.dataset.action, el);
   handleArchiveInput(el.dataset.action, el);
   handleTrashInput(el.dataset.action, el);
