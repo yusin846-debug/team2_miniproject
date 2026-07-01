@@ -19,6 +19,7 @@ export function headerView(state) {
     <nav class="tabs">
       ${tab('write', '잡도리')}
       ${tab('archive', '보관함')}
+      ${tab('trash', '휴지통')}
     </nav>
     <div class="spacer"></div>
     <button class="icon-btn" data-action="tour:open" title="둘러보기 다시 보기">?</button>
