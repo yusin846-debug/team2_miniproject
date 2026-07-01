@@ -81,7 +81,7 @@ function loadFromDetail() {
     tab: 'write', stage: 'input', detailId: null,
     target: item.company, role: item.role,
     question: item.question || '', text: item.content || item.snippet || '',
-    customCompany: '', appliedIds: [], activeId: null,
+    customCompany: '', customRole: '', appliedIds: [], activeId: null,
     toast: `${item.company} 자소서를 불러왔어요.`,
   });
   setTimeout(() => setState({ toast: '' }), 2200);

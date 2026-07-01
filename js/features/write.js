@@ -16,10 +16,12 @@ export const writeInitialState = {
   target: '토스',
   role: '프로덕트 디자이너',
   customCompany: '',
+  customRole: '',
 };
 
 export function writeView(state) {
   const target = state.customCompany || state.target;
+  const role = state.customRole || state.role;
   const origin = detectOrigin(state.text, target);
   const charCount = state.text.length;
   const canRun = (state.text || '').trim().length > 0 && !!target;
@@ -35,7 +37,7 @@ export function writeView(state) {
   }).join('');
 
   const roleChips = ROLES.map((r) => {
-    const active = state.role === r;
+    const active = role === r;
     return `<button class="role-chip ${active ? 'is-active' : ''}" data-action="write:role" data-role="${r}">${r}</button>`;
   }).join('');
 
@@ -84,6 +86,9 @@ export function writeView(state) {
 
         <div class="card panel">
           <h3 class="panel__title">지원 직군</h3>
+          <input class="panel__input" data-action="write:custom-role" value="${escapeHtml(state.customRole)}"
+                 placeholder="직군을 직접 입력하거나 아래에서 골라주세요" />
+          <div class="panel__hint">자주 찾는 직군</div>
           <div class="role-chips">${roleChips}</div>
         </div>
 
@@ -97,13 +102,14 @@ async function runTransfer() {
   const s = getState();
   if (!(s.text || '').trim() || !s.target) return; // canRun 아닐 때는 무시
   const target = s.customCompany || s.target;
+  const role = s.customRole || s.role;
   let origin, suggestions;
   try {
-    ({ origin, suggestions } = await analyze({ text: s.text, target, role: s.role }));
+    ({ origin, suggestions } = await analyze({ text: s.text, target, role }));
   } catch {
     // AI 서버(api/analyze.js) 호출 실패 시(키 미설정, 네트워크 오류 등) 화면 전환이
     // 그대로 멈춰버리지 않도록 로컬 규칙 기반 매칭으로 대체한다.
-    ({ origin, suggestions } = buildSuggestions({ text: s.text, target, role: s.role }));
+    ({ origin, suggestions } = buildSuggestions({ text: s.text, target, role }));
     setState({ toast: 'AI 서버 연결에 실패해 로컬 매칭으로 대신 보여드려요.' });
     setTimeout(() => setState({ toast: '' }), 2600);
   }
@@ -118,13 +124,14 @@ async function runTransfer() {
 
 export const writeActions = {
   'write:company': (_e, el) => setState({ target: el.dataset.company, customCompany: '' }),
-  'write:role':    (_e, el) => setState({ role: el.dataset.role }),
+  'write:role':    (_e, el) => setState({ role: el.dataset.role, customRole: '' }),
   'write:start':   () => runTransfer(),
 };
 
 // input 이벤트(타이핑 중 실시간 반영)는 click 위임과 별도로 처리
 export function handleWriteInput(action, el) {
-  if (action === 'write:text')     setState({ text: el.value });
-  if (action === 'write:question') setState({ question: el.value });
-  if (action === 'write:custom')   setState({ customCompany: el.value, target: el.value || getState().target });
+  if (action === 'write:text')       setState({ text: el.value });
+  if (action === 'write:question')   setState({ question: el.value });
+  if (action === 'write:custom')     setState({ customCompany: el.value, target: el.value || getState().target });
+  if (action === 'write:custom-role') setState({ customRole: el.value, role: el.value || getState().role });
 }
