@@ -2,9 +2,10 @@
 
 .onboarding-overlay {
   position: fixed; inset: 0; z-index: 70;
-  background: #0D1B3D;
+  background: rgba(13, 27, 61, .48);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
-  animation: hs-overlay-fade .28s ease;
 }
 .onboarding-card {
   width: 452px; max-width: calc(100vw - 32px);

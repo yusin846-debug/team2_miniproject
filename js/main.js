@@ -116,7 +116,12 @@ delegate(root, 'change', '[data-action]', (e, el) => {
   if (el.type === 'file') handleArchiveInput(el.dataset.action, el, e);
 });
 
-subscribe(paint);
+// setState는 write:text 입력 말고도 토스트 자동 숨김 타이머·보관함 검색 등
+// 곳곳에서 비동기로 호출된다. 그 setState들도 그대로 두면 한글 조합 중에
+// paint()를 강제로 실행시켜 조합 중이던 입력창 DOM을 갈아치워버리므로,
+// 조합 중에는 어떤 setState가 원인이든 paint 자체를 건너뛴다.
+// (state는 정상적으로 갱신되고, 조합이 끝나면 곧바로 setState가 다시 일어나 화면이 따라잡는다.)
+subscribe((s) => { if (!isComposing) paint(s); });
 
 /* ---------- 시작 ---------- */
 try {
