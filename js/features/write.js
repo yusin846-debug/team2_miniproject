@@ -18,6 +18,7 @@ export const writeInitialState = {
   customCompany: '',
   customRole: '',
   isAnalyzing: false, // "환승 준비하기" 응답을 기다리는 동안 로딩 오버레이 표시
+  editorExpanded: false, // 자소서 입력창을 크게 보기 토글
 };
 
 function loadingOverlay(state) {
@@ -81,7 +82,11 @@ export function writeView(state) {
           <input class="editor__question-input" data-action="write:question" value="${escapeHtml(state.question)}"
                  placeholder="자소서 문항을 입력하세요 (예: 지원 동기를 서술해 주세요)" />
         </div>
-        <textarea class="editor__area" data-action="write:text" placeholder="여기에 자소서 답변을 붙여넣으세요.">${escapeHtml(state.text)}</textarea>
+        <textarea class="editor__area ${state.editorExpanded ? 'is-expanded' : ''}" data-action="write:text" placeholder="여기에 자소서 답변을 붙여넣으세요.">${escapeHtml(state.text)}</textarea>
+        <button class="editor__resize-toggle ${state.editorExpanded ? 'is-expanded' : ''}" type="button" data-action="write:toggle-size">
+          <span class="editor__resize-icon">⌄</span>
+          ${state.editorExpanded ? '작게 보기' : '크게 보기'}
+        </button>
       </div>
 
       <!-- 설정 패널 -->
@@ -143,9 +148,10 @@ async function runTransfer() {
 }
 
 export const writeActions = {
-  'write:company': (_e, el) => setState({ target: el.dataset.company, customCompany: '' }),
-  'write:role':    (_e, el) => setState({ role: el.dataset.role, customRole: '' }),
-  'write:start':   () => runTransfer(),
+  'write:company':     (_e, el) => setState({ target: el.dataset.company, customCompany: '' }),
+  'write:role':        (_e, el) => setState({ role: el.dataset.role, customRole: '' }),
+  'write:start':       () => runTransfer(),
+  'write:toggle-size': () => setState((s) => ({ editorExpanded: !s.editorExpanded })),
 };
 
 // input 이벤트(타이핑 중 실시간 반영)는 click 위임과 별도로 처리
