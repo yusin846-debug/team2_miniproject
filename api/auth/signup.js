@@ -26,7 +26,12 @@ export default async function handler(req, res) {
   const { username, password, name } = req.body || {};
 
   if (!username || !password || !name) {
-    return res.status(400).json({ message: '아이디, 비밀번호, 이름을 모두 입력해주세요' });
+    return res.status(400).json({ message: '이메일, 비밀번호, 이름을 모두 입력해주세요' });
+  }
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!EMAIL_RE.test(username)) {
+    return res.status(400).json({ message: '올바른 이메일 형식을 입력해주세요' });
   }
 
   const db = await readDb();
