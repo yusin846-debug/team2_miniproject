@@ -23,9 +23,10 @@ export function headerView(state) {
     </nav>
     <div class="spacer"></div>
     <button class="icon-btn" data-action="tour:open" title="둘러보기 다시 보기">?</button>
+    <button class="icon-btn" data-action="auth:logout" title="로그아웃">↩</button>
     <div class="user-chip">
-      <span class="user-chip__avatar">취준</span>
-      <span class="user-chip__name">취준생님</span>
+      <span class="user-chip__avatar">${state.user?.name?.[0] ?? '?'}</span>
+      <span class="user-chip__name">${state.user?.name ?? ''}님</span>
     </div>
   </header>`;
 }

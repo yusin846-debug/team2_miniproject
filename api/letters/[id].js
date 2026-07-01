@@ -23,13 +23,18 @@ function snippetOf(content = '') {
   return raw.length > 80 ? raw.slice(0, 80) + '…' : raw;
 }
 
+const ADMIN_ID = 'u1';
+
 export default async function handler(req, res) {
   const { id } = req.query;
+  const userId = (req.query.userId || '').toString().trim();
+  const isAdmin = userId === ADMIN_ID;
 
   if (req.method === 'GET') {
     const db = await readDb();
     const item = db.letters.find((a) => a.id === id);
     if (!item) return res.status(404).json({ error: '찾을 수 없어요' });
+    if (!isAdmin && item.userId !== userId) return res.status(403).json({ error: '권한이 없어요' });
     return res.status(200).json({ ...item, snippet: snippetOf(item.content) });
   }
 
@@ -47,6 +52,7 @@ export default async function handler(req, res) {
     const db = await readDb();
     const item = db.letters.find((a) => a.id === id);
     if (!item) return res.status(404).json({ error: '찾을 수 없어요' });
+    if (!isAdmin && item.userId !== userId) return res.status(403).json({ error: '권한이 없어요' });
 
     const permanent = req.query.permanent === 'true';
     if (permanent) {
