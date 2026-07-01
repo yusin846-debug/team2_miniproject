@@ -1,6 +1,9 @@
 // js/features/onboarding.js
 // 담당: 팀원 A
-// 온보딩 — 로그인 화면 + 기능 투어. 특정 화면 소유가 아닌 공통 셸(최초 진입 시에만 노출).
+// 온보딩 — 로그인/회원가입 화면 + 기능 투어. 특정 화면 소유가 아닌 공통 셸(최초 진입 시에만 노출).
+
+import { setState } from '../state.js';
+import { login, logout, signup, saveUser } from '../services/auth.js';
 
 const TOUR = [
   null, // index 0 = 로그인 단계 (투어 슬라이드 아님)
@@ -9,10 +12,21 @@ const TOUR = [
   { title: '복사 한 번, 보관함에 차곡차곡', desc: '마음에 들면 바로 복사하거나 보관함에 저장해 다음 지원 때 또 환승하세요.' },
 ];
 
+/* ---------- 상태 슬라이스 (팀 E가 main.js 에 spread 해줘야 함) ---------- */
+export const onboardingInitialState = {
+  authMode: 'buttons', // 'buttons' | 'form' | 'signup'
+  authError: '',
+  // authUsername / authPassword 는 state에 두지 않음 — 타이핑마다 re-render가 일어나
+  // onboarding-card 애니메이션이 반복 재생되므로 submit 시 DOM에서 직접 읽는다.
+};
+
+/* ---------- 뷰 ---------- */
 export function onboardingView(state) {
   const step = state.onboardingStep;
 
   if (step === 0) {
+    if (state.authMode === 'form')   return renderLoginForm(state);
+    if (state.authMode === 'signup') return renderSignupForm(state);
     return `
     <div class="onboarding-overlay">
       <div class="onboarding-card">
@@ -20,10 +34,10 @@ export function onboardingView(state) {
           <img class="onboarding-card__illust" src="assets/onboarding-login.png"
                alt="자소서 환승 — 더 좋은 회사로, 당신의 이야기를 환승하세요." />
           <div class="onboarding-card__actions">
-            <button class="btn btn--kakao btn--block" data-action="auth:login" data-provider="kakao">
+            <button class="btn btn--kakao btn--block" disabled>
               <span class="kakao-ico">k</span>카카오로 시작하기
             </button>
-            <button class="btn btn--email btn--block" data-action="auth:login" data-provider="email">이메일로 시작하기</button>
+            <button class="btn btn--email btn--block" data-action="auth:show-form">이메일로 시작하기</button>
           </div>
           <button class="onboarding-card__skip" data-action="tour:skip">그냥 둘러볼게요</button>
         </div>
@@ -79,4 +93,114 @@ export function onboardingView(state) {
       </div>
     </div>
   </div>`;
+}
+
+function renderLoginForm(state) {
+  return `
+  <div class="onboarding-overlay">
+    <div class="onboarding-card">
+      <div class="onboarding-card__hero">
+        <div class="login-form">
+          <h2 class="login-form__title">로그인</h2>
+          ${state.authError ? `<p class="login-form__error">${state.authError}</p>` : ''}
+          <div class="login-form__fields">
+            <input class="login-form__input" type="text" placeholder="아이디"
+              data-action="auth:username" autocomplete="username" />
+            <input class="login-form__input" type="password" placeholder="비밀번호"
+              data-action="auth:password" autocomplete="current-password" />
+          </div>
+          <div class="login-form__actions">
+            <button class="btn btn--primary btn--block" data-action="auth:submit">로그인</button>
+            <button class="btn btn--ghost btn--block" data-action="auth:back">뒤로</button>
+          </div>
+          <p class="login-form__switch">계정이 없으신가요? <button class="login-form__switch-btn" data-action="auth:show-signup">회원가입</button></p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSignupForm(state) {
+  return `
+  <div class="onboarding-overlay">
+    <div class="onboarding-card">
+      <div class="onboarding-card__hero">
+        <div class="login-form">
+          <h2 class="login-form__title">회원가입</h2>
+          ${state.authError ? `<p class="login-form__error">${state.authError}</p>` : ''}
+          <div class="login-form__fields">
+            <input class="login-form__input" type="text" placeholder="아이디"
+              data-action="auth:signup-username" autocomplete="username" />
+            <input class="login-form__input" type="password" placeholder="비밀번호"
+              data-action="auth:signup-password" autocomplete="new-password" />
+            <input class="login-form__input" type="text" placeholder="이름"
+              data-action="auth:signup-name" autocomplete="name" />
+          </div>
+          <div class="login-form__actions">
+            <button class="btn btn--primary btn--block" data-action="auth:signup-submit">가입하기</button>
+            <button class="btn btn--ghost btn--block" data-action="auth:show-form">로그인으로 돌아가기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- 액션 (팀 E가 main.js actions 에 ...onboardingActions 로 spread 해줘야 함) ---------- */
+export const onboardingActions = {
+  'auth:show-form':     () => setState({ authMode: 'form', authError: '' }),
+  'auth:show-signup':   () => setState({ authMode: 'signup', authError: '' }),
+  'auth:back':          () => setState({ authMode: 'buttons', authError: '' }),
+  'auth:logout':        () => {
+    logout();
+    setState({ screen: 'onboarding', onboardingStep: 0, authMode: 'buttons', authError: '', user: null });
+  },
+  'auth:submit':        async () => {
+    const username = document.querySelector('[data-action="auth:username"]')?.value?.trim() ?? '';
+    const password = document.querySelector('[data-action="auth:password"]')?.value ?? '';
+    if (!username || !password) {
+      setState({ authError: '아이디와 비밀번호를 입력해주세요' });
+      return;
+    }
+    try {
+      const user = await login({ username, password });
+      saveUser(user);
+      setState({ screen: 'app', user, authError: '' });
+    } catch (err) {
+      const is401 = err?.message?.includes('401');
+      setState({ authError: is401 ? 'ID/비밀번호를 확인해주세요' : '로그인에 실패했어요' });
+    }
+  },
+  'auth:signup-submit': async () => {
+    const username = document.querySelector('[data-action="auth:signup-username"]')?.value?.trim() ?? '';
+    const password = document.querySelector('[data-action="auth:signup-password"]')?.value ?? '';
+    const name     = document.querySelector('[data-action="auth:signup-name"]')?.value?.trim() ?? '';
+    if (!username || !password || !name) {
+      setState({ authError: '아이디, 비밀번호, 이름을 모두 입력해주세요' });
+      return;
+    }
+    try {
+      const user = await signup({ username, password, name });
+      saveUser(user);
+      setState({ screen: 'app', user, authError: '' });
+    } catch (err) {
+      const is409 = err?.message?.includes('409');
+      setState({ authError: is409 ? '이미 사용 중인 아이디예요' : '가입에 실패했어요' });
+    }
+  },
+};
+
+/* ---------- input 핸들러 (팀 E가 main.js input delegate 에 추가해줘야 함) ---------- */
+// DOM 값만 유지 — setState 하면 re-render → onboarding-card 애니메이션 재실행되므로 의도적으로 비워둠
+export function handleOnboardingInput() {}
+
+/* ---------- keydown 핸들러 (팀 E가 main.js 에 keydown delegate 추가해줘야 함) ---------- */
+export function handleOnboardingKeydown(e, action) {
+  if (e.key !== 'Enter') return;
+  if (action === 'auth:username' || action === 'auth:password') {
+    onboardingActions['auth:submit']();
+  }
+  if (action === 'auth:signup-username' || action === 'auth:signup-password' || action === 'auth:signup-name') {
+    onboardingActions['auth:signup-submit']();
+  }
 }
