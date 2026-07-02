@@ -41,6 +41,23 @@
   letter-spacing: -.01em; color: var(--navy); padding: 0; line-height: 1.3;
 }
 
+/* 문항·본문이 둘 다 비어 있을 때만 보이는 보조 안내 — 로그인 뒤 이어지는 3단계
+   투어와는 별개로, 에디터 안에서 "여기 뭘 채워야 하는지"를 바로 알려주는 역할.
+   둘 중 하나라도 입력이 시작되면 사라진다. */
+.editor__guide {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin: 10px 20px 0; padding: 11px 13px;
+  background: color-mix(in srgb, var(--accent) 7%, white);
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, white);
+  border-radius: 11px;
+  animation: hs-overlay-fade .2s ease;
+}
+.editor__guide-ico { flex: none; font-size: 14px; line-height: 1.4; }
+.editor__guide-text {
+  font-size: 12.5px; line-height: 1.55; color: var(--muted);
+}
+.editor__guide-text b { color: var(--navy); font-weight: 700; }
+
 /* 브라우저 기본 리사이즈 손잡이(모서리 대각선 아이콘) 대신, 아래 크게/작게 보기
    토글(.editor__resize-toggle) 로 두 단계 높이를 전환한다 — 자유 드래그보다 예측 가능하고
    디자인 톤에도 맞다. */

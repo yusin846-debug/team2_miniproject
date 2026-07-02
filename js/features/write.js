@@ -8,11 +8,10 @@ import { COMPANY_ORDER, badgeStyle } from '../data/companies.js';
 import { detectOrigin, buildSuggestions } from '../lib/matcher.js';
 import { ROLES } from '../data/roles.js';
 import { escapeHtml } from '../lib/dom.js';
-import { SAMPLE_LETTER, SAMPLE_QUESTION } from '../data/samples.js';
 
 export const writeInitialState = {
-  text: SAMPLE_LETTER,
-  question: SAMPLE_QUESTION,
+  text: '',
+  question: '',
   target: '토스',
   role: '프로덕트 디자이너',
   customCompany: '',
@@ -90,6 +89,14 @@ export function writeView(state) {
           <input class="editor__question-input" data-action="write:question" value="${escapeHtml(state.question)}"
                  placeholder="자소서 문항을 입력하세요 (예: 지원 동기를 서술해 주세요)" />
         </div>
+        ${!state.question.trim() && !state.text.trim() ? `
+        <div class="editor__guide">
+          <span class="editor__guide-ico">💡</span>
+          <p class="editor__guide-text">
+            <b>자소서 문항</b>을 입력하고 <b>자소서 내용</b>을 붙여넣어주세요.
+            잡도리가 회사·직군에 맞게 첨삭해 드릴게요.
+          </p>
+        </div>` : ''}
         <textarea class="editor__area ${state.editorExpanded ? 'is-expanded' : ''}" data-action="write:text" placeholder="여기에 자소서 답변을 붙여넣으세요.">${escapeHtml(state.text)}</textarea>
         <button class="editor__resize-toggle ${state.editorExpanded ? 'is-expanded' : ''}" type="button" data-action="write:toggle-size">
           <span class="editor__resize-icon">⌄</span>
