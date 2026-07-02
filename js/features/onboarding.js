@@ -152,10 +152,11 @@ function renderSignupForm(state) {
 
 function enterAppOrTour(user) {
   const skipTour = localStorage.getItem('hs_onboard_hide') === '1';
+  const base = { user, authError: '', text: '', question: '' };
   if (skipTour) {
-    setState({ screen: 'app', user, authError: '' });
+    setState({ screen: 'app', ...base });
   } else {
-    setState({ screen: 'onboarding', onboardingStep: 1, user, authError: '' });
+    setState({ screen: 'onboarding', onboardingStep: 1, ...base });
   }
 }
 
